@@ -1,0 +1,37 @@
+{
+  "name": "dharmi-arpit-wedding",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "node scripts/kill-ports.mjs && node scripts/clean-next.mjs && next dev -H 127.0.0.1",
+    "dev:lan": "node scripts/kill-ports.mjs && node scripts/clean-next.mjs && next dev -H 0.0.0.0",
+    "dev:reset": "node scripts/reset-dev.mjs",
+    "phone": "node scripts/phone-server.mjs",
+    "phone:quick": "node scripts/kill-ports.mjs && sleep 0.6 && npm run start:lan",
+    "dev:phone": "node scripts/kill-ports.mjs && node scripts/clean-next.mjs && next dev -H 0.0.0.0",
+    "dev:clean": "node scripts/reset-dev.mjs",
+    "build": "next build",
+    "start": "next start -H 127.0.0.1",
+    "start:lan": "next start -H 0.0.0.0",
+    "preview": "npm run build && npm run start",
+    "preview:phone": "npm run build && npm run start:lan",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "framer-motion": "^12.40.0",
+    "next": "^15.1.6",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.2.0",
+    "@types/node": "^22.10.7",
+    "@types/react": "^19.0.7",
+    "@types/react-dom": "^19.0.3",
+    "eslint": "^9.18.0",
+    "eslint-config-next": "^15.1.6",
+    "postcss": "^8.5.1",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.3"
+  }
+}

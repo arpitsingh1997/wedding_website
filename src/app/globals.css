@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-blush-ivory text-ink-deep antialiased;
+  }
+}
+
+@layer utilities {
+  .watercolor-wash {
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 30%, rgba(232, 212, 208, 0.55) 0%, transparent 55%),
+      radial-gradient(ellipse 70% 50% at 80% 70%, rgba(217, 196, 160, 0.28) 0%, transparent 50%),
+      radial-gradient(ellipse 60% 40% at 50% 90%, rgba(245, 230, 227, 0.6) 0%, transparent 45%);
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Keep PNG artwork sharp — no filters that soften edges */
+  .crisp-image {
+    image-rendering: auto;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+}
