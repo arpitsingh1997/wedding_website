@@ -6,8 +6,8 @@ export const LANDING3_MOBILE = `/images/landing3-mobile.mp4?${BUILD}`;
 /** Mac second page — video */
 export const LANDING4_DESKTOP = `/images/landing4-desktop.mp4?${BUILD}`;
 
-/** Phone page 3 — full invitation artwork */
-export const LANDING5_MOBILE = `/images/landing5@2x.png?${BUILD}`;
+/** Phone page 3 — custom ChatGPT phone artwork from Desktop */
+export const LANDING5_MOBILE = `/images/chatgpt-phone.png?${BUILD}`;
 
 /** Mac page 3 — full invitation artwork */
 export const LANDING6_DESKTOP = `/images/landing6@2x.png?${BUILD}`;
