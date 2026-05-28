@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { isDesktopViewport } from "@/lib/viewport";
-import { OurStoryMobile } from "./our-story/OurStoryMobile";
+import { OurStoryDesktop } from "./our-story/OurStoryDesktop";
+import { OurStoryPanelScroll } from "./our-story/OurStoryPanelScroll";
 
 type OurStoryScrollProps = {
   open: boolean;
@@ -12,29 +12,21 @@ type OurStoryScrollProps = {
 
 /**
  * Our Story — full-bleed scroll.
- * Phone: HTML/CSS rebuild (four panels).
- * Mac: single landing7 artwork.
+ * Phone: five PNG panels (1→5) seamless vertical scroll.
+ * Mac: single desktop.png seamless scroll.
  */
 export function OurStoryScroll({ open, onClose }: OurStoryScrollProps) {
   const [mounted, setMounted] = useState(false);
-  const [isDesktop, setIsDesktop] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   useEffect(() => {
-    if (!mounted) return;
-    const sync = () => setIsDesktop(isDesktopViewport());
-    sync();
-    const mq = window.matchMedia("(min-width: 1024px)");
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, [mounted]);
-
-  useEffect(() => {
     if (!open) return;
     document.body.style.overflow = "hidden";
+    const panel = document.getElementById("our-story");
+    panel?.scrollTo(0, 0);
     return () => {
       document.body.style.overflow = "";
     };
@@ -63,7 +55,12 @@ export function OurStoryScroll({ open, onClose }: OurStoryScrollProps) {
       </button>
 
       <main className="w-screen max-w-[100vw]">
-        <OurStoryMobile />
+        <div className="lg:hidden">
+          <OurStoryPanelScroll />
+        </div>
+        <div className="hidden lg:block">
+          <OurStoryDesktop />
+        </div>
       </main>
     </div>,
     document.body

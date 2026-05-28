@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import { luxuryEase } from "@/lib/motion";
 
 const NAV_ROW_ONE = [
-  { label: "Home", href: "#home", id: "home" as const },
   { label: "Our Story", href: "#our-story", id: "our-story" as const },
   { label: "Save the Date", href: "#save-the-date", id: "save-the-date" as const },
 ] as const;
@@ -17,7 +16,7 @@ const NAV_ROW_TWO = [
 
 const NAV_ITEMS = [...NAV_ROW_ONE, ...NAV_ROW_TWO] as const;
 
-type NavItemId = "home" | "our-story" | "save-the-date";
+type NavItemId = "our-story" | "save-the-date";
 
 type NavItem = {
   label: string;
@@ -27,7 +26,6 @@ type NavItem = {
 
 type PostRevealNavProps = {
   reveal?: boolean;
-  onHomeClick?: () => void;
   onOurStoryClick?: () => void;
   onSaveTheDateClick?: () => void;
 };
@@ -77,7 +75,7 @@ function NavRow({
               className={linkClass}
               onClick={(e) => onItemClick(item, e)}
               onPointerUp={(e) => {
-                if (item.id === "save-the-date" || item.id === "home" || item.id === "our-story") {
+                if (item.id === "save-the-date" || item.id === "our-story") {
                   onItemClick(item, e);
                 }
               }}
@@ -93,36 +91,31 @@ function NavRow({
 
 export function PostRevealNav({
   reveal = true,
-  onHomeClick,
   onOurStoryClick,
   onSaveTheDateClick,
 }: PostRevealNavProps) {
   const mobileLinkClass =
-    "px-0.5 py-0.5 font-bold text-black text-sm tracking-[0.08em] uppercase [-webkit-text-stroke:0.35px_#000] [paint-order:stroke_fill] [text-shadow:0_0_10px_rgba(255,255,255,0.95),0_1px_2px_rgba(255,255,255,0.8)] transition-colors hover:text-black/80 focus:outline-none focus-visible:text-black/80 lg:font-bold";
+    "px-0.5 py-0.5 font-bold text-black text-sm tracking-[0.08em] uppercase [-webkit-text-stroke:0.35px_#000] [paint-order:stroke_fill] [text-shadow:0_0_10px_rgba(255,255,255,0.95),0_1px_2px_rgba(255,255,255,0.8)] transition-colors hover:text-black/80 focus:outline-none focus-visible:text-black/80";
 
   const desktopLinkClass =
-    "px-1 py-0.5 font-bold text-black transition-colors hover:text-black/75 focus:outline-none focus-visible:text-black/75";
+    "px-0.5 py-0.5 font-extrabold text-black uppercase [-webkit-text-stroke:0.45px_#000] [paint-order:stroke_fill] [text-shadow:0_0_10px_rgba(255,255,255,0.95),0_1px_2px_rgba(255,255,255,0.8)] transition-colors hover:text-black/75 focus:outline-none focus-visible:text-black/75";
 
   const mobileDotClass =
     "mx-0.5 text-sm font-bold text-black/55 [-webkit-text-stroke:0.25px_#000] [paint-order:stroke_fill] [text-shadow:0_0_8px_rgba(255,255,255,0.9)] sm:mx-1";
 
-  const desktopDotClass = "mx-2 font-bold text-black/40 lg:mx-3";
+  const desktopDotClass = "mx-1 font-extrabold text-black/40 lg:mx-1.5";
 
   const mobileRowListClass =
     "flex max-w-[100vw] flex-wrap items-center justify-center gap-x-0 font-display uppercase";
 
   const desktopRowListClass =
-    "flex max-w-[100vw] flex-wrap items-center justify-center gap-x-0.5 font-display text-[10px] tracking-[0.14em] uppercase sm:text-[11px] sm:tracking-[0.18em] lg:gap-x-1 lg:text-xs lg:tracking-[0.2em]";
+    "flex max-w-[100vw] flex-wrap items-center justify-center gap-x-0.5 font-display text-[10px] tracking-[0.12em] uppercase sm:text-[11px] sm:tracking-[0.14em] lg:gap-x-1 lg:text-xs lg:tracking-[0.16em]";
 
   const handleItemClick = (
     item: NavItem,
     e: MouseEvent<HTMLAnchorElement> | PointerEvent<HTMLAnchorElement>
   ) => {
     e.preventDefault();
-    if (item.id === "home") {
-      onHomeClick?.();
-      return;
-    }
     if (item.id === "our-story") {
       onOurStoryClick?.();
       return;

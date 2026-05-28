@@ -51,29 +51,28 @@ export function SecondPage({ onContinue }: SecondPageProps) {
       className="fixed inset-0 z-[99999] bg-[#F4EFE6]"
       style={{ width: "100vw", height: "100dvh" }}
     >
-      {/* Mac — landing4@2x.mp4, full artwork visible (not cropped) */}
-      <div className="hidden h-full w-full lg:flex lg:items-center lg:justify-center">
+      {/* Mac — edge-to-edge vertical fill */}
+      <div className="pointer-events-none absolute inset-0 hidden overflow-hidden lg:block" aria-hidden>
         <video
           ref={desktopVideoRef}
           src={LANDING4_DESKTOP}
-          className="pointer-events-none max-h-[100dvh] max-w-[100vw] object-contain"
+          className="absolute left-1/2 top-1/2 h-[100dvh] w-[100vw] max-w-none -translate-x-1/2 -translate-y-1/2 object-cover object-center"
           autoPlay
           loop
           muted
           playsInline
           preload="auto"
           data-second-page="landing4-desktop"
-          aria-hidden
-        />
-        <button
-          type="button"
-          onPointerUp={handleTap}
-          onClick={handleTap}
-          className="fixed inset-0 z-[100000] cursor-pointer border-0 bg-transparent"
-          style={{ WebkitTapHighlightColor: "transparent", touchAction: "manipulation" }}
-          aria-label="Continue to final page"
         />
       </div>
+      <button
+        type="button"
+        onPointerUp={handleTap}
+        onClick={handleTap}
+        className="fixed inset-0 z-[100000] hidden cursor-pointer border-0 bg-transparent lg:block"
+        style={{ WebkitTapHighlightColor: "transparent", touchAction: "manipulation" }}
+        aria-label="Continue to final page"
+      />
 
       {/* Phone — landing3@2x.mp4 */}
       <div className="relative h-full w-full lg:hidden">

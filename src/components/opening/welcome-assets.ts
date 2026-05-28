@@ -1,4 +1,4 @@
-export const BUILD = "page3-artwork-refresh-20260525-2312";
+export const BUILD = "our-story-desktop-v2-20260528";
 
 /** Phone second page — video */
 export const LANDING3_MOBILE = `/images/landing3-mobile.mp4?${BUILD}`;
@@ -9,11 +9,20 @@ export const LANDING4_DESKTOP = `/images/landing4-desktop.mp4?${BUILD}`;
 /** Phone page 3 — custom ChatGPT phone artwork from Desktop */
 export const LANDING5_MOBILE = `/images/chatgpt-phone.png?${BUILD}`;
 
-/** Mac page 3 — full invitation artwork */
-export const LANDING6_DESKTOP = `/images/landing6@2x.png?${BUILD}`;
+/** Mac page 3 — ChatGPT desktop artwork */
+export const LANDING6_DESKTOP = `/images/chatgpt.png?${BUILD}`;
 
-/** Our Story — Mac: single full-bleed scroll */
-export const OUR_STORY_IMAGE = `/images/landing7@2x.png?${BUILD}`;
+/** Our Story — Mac: single seamless scroll (Desktop “our story/desktop.png”) */
+export const OUR_STORY_DESKTOP = `/images/our-story-scroll/desktop.png?${BUILD}`;
+
+/** Our Story — phone: five-panel seamless scroll (Desktop “our story” folder) */
+export const OUR_STORY_SCROLL_PAGES = [
+  `/images/our-story-scroll/page-1.png?${BUILD}`,
+  `/images/our-story-scroll/page-2.png?${BUILD}`,
+  `/images/our-story-scroll/page-3.png?${BUILD}`,
+  `/images/our-story-scroll/page-4.png?${BUILD}`,
+  `/images/our-story-scroll/page-5.png?${BUILD}`,
+] as const;
 
 /** Our Story — phone HTML rebuild: photos extracted from panel artwork */
 export const OUR_STORY_PHOTOS = {
