@@ -5,7 +5,6 @@ export const PHASE_ORDER: OpeningPhase[] = [
   "bow",
   "ribbon",
   "flaps",
-  "welcome",
   "story",
 ];
 

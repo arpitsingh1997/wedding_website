@@ -1,20 +1,41 @@
 "use client";
 
-import type { MouseEvent, PointerEvent } from "react";
-import { motion } from "framer-motion";
-import { luxuryEase } from "@/lib/motion";
+import type { MouseEvent } from "react";
+import { WeddingCountdown } from "./WeddingCountdown";
+import { LANDING3_SCROLL } from "./welcome-assets";
 
-const NAV_ROW_ONE = [
-  { label: "Our Story", href: "#our-story", id: "our-story" as const },
-  { label: "Save the Date", href: "#save-the-date", id: "save-the-date" as const },
+/**
+ * Hit boxes measured from landing3@2x.png maroon text bands (1080×1920).
+ * Our Story → story scroll only. Save the Date → video only.
+ */
+const NAV_ITEMS = [
+  {
+    label: "Our Story",
+    href: "#our-story",
+    id: "our-story" as const,
+    top: "41.2%",
+    height: "5.8%",
+  },
+  {
+    label: "Save the Date",
+    href: "#save-the-date",
+    id: "save-the-date" as const,
+    top: "49.2%",
+    height: "5.8%",
+  },
+  {
+    label: "Wedding Events",
+    href: "#events",
+    top: "60.2%",
+    height: "5.8%",
+  },
+  {
+    label: "Celebrating Together",
+    href: "#celebrating-together",
+    top: "68.0%",
+    height: "11.0%",
+  },
 ] as const;
-
-const NAV_ROW_TWO = [
-  { label: "Events", href: "#events" },
-  { label: "Our People", href: "#our-people" },
-] as const;
-
-const NAV_ITEMS = [...NAV_ROW_ONE, ...NAV_ROW_TWO] as const;
 
 type NavItemId = "our-story" | "save-the-date";
 
@@ -22,6 +43,8 @@ type NavItem = {
   label: string;
   href: string;
   id?: NavItemId;
+  top: string;
+  height: string;
 };
 
 type PostRevealNavProps = {
@@ -30,92 +53,13 @@ type PostRevealNavProps = {
   onSaveTheDateClick?: () => void;
 };
 
-type NavRowProps = {
-  items: readonly NavItem[];
-  startIndex: number;
-  reveal: boolean;
-  linkClass: string;
-  dotClass: string;
-  listClass: string;
-  onItemClick: (item: NavItem, e: MouseEvent<HTMLAnchorElement> | PointerEvent<HTMLAnchorElement>) => void;
-};
-
-function NavRow({
-  items,
-  startIndex,
-  reveal,
-  linkClass,
-  dotClass,
-  listClass,
-  onItemClick,
-}: NavRowProps) {
-  return (
-    <ul className={listClass}>
-      {items.map((item, index) => {
-        const globalIndex = startIndex + index;
-        return (
-          <motion.li
-            key={item.label}
-            className="flex items-center"
-            initial={{ opacity: 0, y: 14 }}
-            animate={reveal ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
-            transition={{
-              duration: 0.85,
-              delay: 0.9 + globalIndex * 0.1,
-              ease: luxuryEase,
-            }}
-          >
-            {index > 0 && (
-              <span className={dotClass} aria-hidden>
-                ·
-              </span>
-            )}
-            <a
-              href={item.href}
-              className={linkClass}
-              onClick={(e) => onItemClick(item, e)}
-              onPointerUp={(e) => {
-                if (item.id === "save-the-date" || item.id === "our-story") {
-                  onItemClick(item, e);
-                }
-              }}
-            >
-              {item.label}
-            </a>
-          </motion.li>
-        );
-      })}
-    </ul>
-  );
-}
-
 export function PostRevealNav({
-  reveal = true,
   onOurStoryClick,
   onSaveTheDateClick,
 }: PostRevealNavProps) {
-  const mobileLinkClass =
-    "px-0.5 py-0.5 font-bold text-black text-sm tracking-[0.08em] uppercase [-webkit-text-stroke:0.35px_#000] [paint-order:stroke_fill] [text-shadow:0_0_10px_rgba(255,255,255,0.95),0_1px_2px_rgba(255,255,255,0.8)] transition-colors hover:text-black/80 focus:outline-none focus-visible:text-black/80";
-
-  const desktopLinkClass =
-    "px-0.5 py-0.5 font-extrabold text-black uppercase [-webkit-text-stroke:0.45px_#000] [paint-order:stroke_fill] [text-shadow:0_0_10px_rgba(255,255,255,0.95),0_1px_2px_rgba(255,255,255,0.8)] transition-colors hover:text-black/75 focus:outline-none focus-visible:text-black/75";
-
-  const mobileDotClass =
-    "mx-0.5 text-sm font-bold text-black/55 [-webkit-text-stroke:0.25px_#000] [paint-order:stroke_fill] [text-shadow:0_0_8px_rgba(255,255,255,0.9)] sm:mx-1";
-
-  const desktopDotClass = "mx-1 font-extrabold text-black/40 lg:mx-1.5";
-
-  const mobileRowListClass =
-    "flex max-w-[100vw] flex-wrap items-center justify-center gap-x-0 font-display uppercase";
-
-  const desktopRowListClass =
-    "flex max-w-[100vw] flex-wrap items-center justify-center gap-x-0.5 font-display text-[10px] tracking-[0.12em] uppercase sm:text-[11px] sm:tracking-[0.14em] lg:gap-x-1 lg:text-xs lg:tracking-[0.16em]";
-
-  const handleItemClick = (
-    item: NavItem,
-    e: MouseEvent<HTMLAnchorElement> | PointerEvent<HTMLAnchorElement>
-  ) => {
+  const handleItemClick = (item: NavItem, e: MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
+    e.stopPropagation();
     if (item.id === "our-story") {
       onOurStoryClick?.();
       return;
@@ -126,40 +70,47 @@ export function PostRevealNav({
   };
 
   return (
-    <nav
-      className="pointer-events-auto absolute inset-x-0 top-0 z-[100010] flex justify-center px-3 pt-1.5 sm:px-4 sm:pt-2"
-      aria-label="Main navigation"
+    <section
+      id="countdown-nav"
+      className="relative w-full bg-[#FFF8ED]"
+      aria-label="Invitation details"
+      data-page="landing3-scroll"
     >
-      <div className="flex flex-col items-center gap-0.5 lg:hidden">
-        <NavRow
-          items={NAV_ROW_ONE}
-          startIndex={0}
-          reveal={reveal}
-          linkClass={mobileLinkClass}
-          dotClass={mobileDotClass}
-          listClass={mobileRowListClass}
-          onItemClick={handleItemClick}
+      <div className="relative mx-auto w-full max-w-[540px] lg:max-w-[480px]">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={LANDING3_SCROLL}
+          alt="Countdown to our forever — Dharmi and Arpit"
+          className="block h-auto w-full select-none"
+          decoding="async"
+          fetchPriority="high"
+          draggable={false}
         />
-        <NavRow
-          items={NAV_ROW_TWO}
-          startIndex={NAV_ROW_ONE.length}
-          reveal={reveal}
-          linkClass={mobileLinkClass}
-          dotClass={mobileDotClass}
-          listClass={mobileRowListClass}
-          onItemClick={handleItemClick}
-        />
-      </div>
 
-      <NavRow
-        items={NAV_ITEMS}
-        startIndex={0}
-        reveal={reveal}
-        linkClass={desktopLinkClass}
-        dotClass={desktopDotClass}
-        listClass={`${desktopRowListClass} hidden lg:flex`}
-        onItemClick={handleItemClick}
-      />
-    </nav>
+        {/* Under “Countdown to our forever”, above the lotus divider */}
+        <div
+          className="pointer-events-none absolute inset-x-0 z-[1] flex justify-center px-5"
+          style={{ top: "24.5%" }}
+        >
+          <WeddingCountdown />
+        </div>
+
+        <nav className="absolute inset-0 z-[2]" aria-label="Main navigation">
+          {NAV_ITEMS.map((item) => (
+            <a
+              key={item.label}
+              href={item.href}
+              className="absolute inset-x-[8%] cursor-pointer"
+              style={{ top: item.top, height: item.height }}
+              aria-label={item.label}
+              data-nav={"id" in item ? item.id : item.href}
+              onClick={(e) => handleItemClick(item, e)}
+            >
+              <span className="sr-only">{item.label}</span>
+            </a>
+          ))}
+        </nav>
+      </div>
+    </section>
   );
 }

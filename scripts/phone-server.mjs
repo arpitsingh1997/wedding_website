@@ -29,9 +29,6 @@ if (phoneUrl) {
 } else {
   console.log("  Phone:  run `ipconfig getifaddr en0` and use http://YOUR_IP:3000");
 }
-console.log(`  Mobile video:  ${macUrl}/images/landing3-mobile.mp4`);
-console.log(`  Mac video:     ${macUrl}/images/landing4-desktop.mp4`);
-console.log("\n  (Run npm run phone after replacing video files so the server picks them up.)\n");
 console.log("");
 
 const child = spawn("npm", ["run", "start:lan"], {

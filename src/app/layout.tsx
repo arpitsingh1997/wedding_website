@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Pinyon_Script } from "next/font/google";
 import "./globals.css";
 
@@ -19,6 +19,13 @@ const pinyon = Pinyon_Script({
 export const metadata: Metadata = {
   title: "Wedding Invitation",
   description: "Dharmi & Arpit — wedding celebration",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#F3E9E6",
 };
 
 export default function RootLayout({
