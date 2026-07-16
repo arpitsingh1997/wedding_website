@@ -1,16 +1,13 @@
-export const BUILD = "our-story-desktop-v2-20260528";
+export const BUILD = "manual-scroll-20260715g";
 
-/** Phone second page — video */
-export const LANDING3_MOBILE = `/images/landing3-mobile.mp4?${BUILD}`;
+/** Invitation / story screen — full-bleed video (Mac + phone) */
+export const LANDING2_VIDEO = `/images/landing2@2x.mp4?${BUILD}`;
 
-/** Mac second page — video */
-export const LANDING4_DESKTOP = `/images/landing4-desktop.mp4?${BUILD}`;
+/** Still frame while invite video buffers (avoids blank under the bow) */
+export const LANDING2_POSTER = `/images/landing2@2x.png?${BUILD}`;
 
-/** Phone page 3 — custom ChatGPT phone artwork from Desktop */
-export const LANDING5_MOBILE = `/images/chatgpt-phone.png?${BUILD}`;
-
-/** Mac page 3 — ChatGPT desktop artwork */
-export const LANDING6_DESKTOP = `/images/chatgpt.png?${BUILD}`;
+/** Scroll-down page — countdown + vertical nav artwork */
+export const LANDING3_SCROLL = `/images/landing3@2x.png?${BUILD}`;
 
 /** Our Story — Mac: single seamless scroll (Desktop “our story/desktop.png”) */
 export const OUR_STORY_DESKTOP = `/images/our-story-scroll/desktop.png?${BUILD}`;

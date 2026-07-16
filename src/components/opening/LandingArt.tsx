@@ -18,7 +18,7 @@ export function LandingArt({ side }: LandingArtProps) {
       aria-hidden
     >
       <div
-        className="relative h-[100dvh] w-[100vw]"
+        className="full-viewport relative w-[100vw]"
         style={{
           marginLeft: isLeft ? 0 : "-50vw",
         }}
@@ -30,7 +30,7 @@ export function LandingArt({ side }: LandingArtProps) {
           decoding="sync"
           fetchPriority="high"
           draggable={false}
-          className="absolute left-1/2 top-1/2 h-[100dvh] w-[100vw] max-w-none -translate-x-1/2 -translate-y-1/2 object-cover object-center"
+          className="full-viewport absolute left-1/2 top-1/2 w-[100vw] max-w-none -translate-x-1/2 -translate-y-1/2 object-cover object-center"
         />
       </div>
     </div>

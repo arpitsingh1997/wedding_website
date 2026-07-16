@@ -3,6 +3,5 @@ export type OpeningPhase =
   | "bow"
   | "ribbon"
   | "flaps"
-  | "welcome"
   | "story"
   | "open";
