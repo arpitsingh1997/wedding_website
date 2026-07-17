@@ -1,12 +1,18 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
-import { luxuryEase } from "@/lib/motion";
+import { useIsDesktop } from "@/lib/use-is-desktop";
 import { OurStoryScroll } from "./OurStoryScroll";
+import { PAGE_CREAM } from "./page-cream";
 import { PostRevealNav } from "./PostRevealNav";
 import { SaveTheDateVideo } from "./SaveTheDateVideo";
-import { LANDING2_POSTER, LANDING2_VIDEO, LANDING3_SCROLL } from "./welcome-assets";
+import {
+  LANDING2_DESKTOP,
+  LANDING2_PHONE,
+  LANDING2A_VIDEO,
+  LANDING3_DESKTOP,
+  LANDING3_SCROLL,
+} from "./welcome-assets";
 
 type ThirdPageProps = {
   /** Invite is visible (bow opening or fully open) — keep video playing */
@@ -15,7 +21,7 @@ type ThirdPageProps = {
   interactive?: boolean;
 };
 
-/** Keep muted looping playback alive (Safari + Chrome). */
+/** Keep muted looping playback alive (Safari + Chrome). Phone only. */
 function useLoopingInviteVideo(
   ref: RefObject<HTMLVideoElement | null>,
   enabled: boolean
@@ -66,7 +72,7 @@ function useLoopingInviteVideo(
   }, [ref, enabled]);
 }
 
-/** Invitation page — full-bleed video, then countdown + nav */
+/** Invitation page — phone PNG + video layer / desktop art, then countdown + nav */
 export function ThirdPage({
   inviteActive = true,
   interactive = true,
@@ -75,36 +81,34 @@ export function ThirdPage({
   const [saveTheDateOpen, setSaveTheDateOpen] = useState(false);
   const [ourStoryOpen, setOurStoryOpen] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const scrollerRef = useRef<HTMLDivElement>(null);
+  const isDesktop = useIsDesktop();
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => setRevealed(true));
     return () => cancelAnimationFrame(frame);
   }, []);
 
-  useLoopingInviteVideo(videoRef, true);
+  useLoopingInviteVideo(videoRef, !isDesktop);
 
-  // Preload countdown artwork so the second page doesn't pop in empty
   useEffect(() => {
     const img = new Image();
-    img.src = LANDING3_SCROLL;
-  }, []);
+    img.src = isDesktop ? LANDING3_DESKTOP : LANDING3_SCROLL;
+  }, [isDesktop]);
 
   const goToCountdown = useCallback(() => {
-    const scroller = scrollerRef.current;
     const menu = document.getElementById("countdown-nav");
-    if (!scroller || !menu) return;
-    scroller.scrollTo({ top: menu.offsetTop, behavior: "smooth" });
+    if (!menu) return;
+    const top = menu.getBoundingClientRect().top + window.scrollY;
+    window.scrollTo({ top, behavior: "smooth" });
   }, []);
 
-  // Re-kick playback when the invite becomes visible under opening flaps
   useEffect(() => {
-    if (!inviteActive) return;
+    if (!inviteActive || isDesktop) return;
     const el = videoRef.current;
     if (!el) return;
     el.muted = true;
     void el.play().catch(() => {});
-  }, [inviteActive]);
+  }, [inviteActive, isDesktop]);
 
   const openOurStory = useCallback(() => {
     setSaveTheDateOpen(false);
@@ -124,49 +128,74 @@ export function ThirdPage({
     setSaveTheDateOpen(false);
   }, []);
 
+  useEffect(() => {
+    if (!ourStoryOpen && !saveTheDateOpen) return;
+    document.documentElement.classList.add("is-scroll-locked");
+    return () => {
+      document.documentElement.classList.remove("is-scroll-locked");
+    };
+  }, [ourStoryOpen, saveTheDateOpen]);
+
   return (
     <>
       <div
-        ref={scrollerRef}
         id="home"
-        className="invite-scroller fixed inset-0 z-[99990] overflow-x-hidden overflow-y-auto bg-[#F3E9E6]"
+        className="invite-scroller"
         style={{
-          width: "100vw",
+          backgroundColor: PAGE_CREAM,
           pointerEvents: interactive ? "auto" : "none",
-          WebkitOverflowScrolling: "touch",
         }}
         data-page="landing2-invitation"
       >
         <section
-          className="full-viewport relative w-full shrink-0 overflow-hidden bg-[#F3E9E6]"
-          aria-label="Invitation video"
+          className="invite-hero"
+          style={{ backgroundColor: PAGE_CREAM }}
+          aria-label="Invitation"
         >
-          <div className="pointer-events-none absolute inset-0 bg-[#F3E9E6]" aria-hidden>
-            {/* Poster sits under the video so unwrap never flashes blank */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={LANDING2_POSTER}
-              alt=""
-              className="full-viewport absolute left-1/2 top-1/2 w-[100vw] max-w-none -translate-x-1/2 -translate-y-1/2 object-cover object-center"
-              decoding="async"
-              fetchPriority="high"
-              draggable={false}
-            />
-            <video
-              ref={videoRef}
-              src={LANDING2_VIDEO}
-              poster={LANDING2_POSTER}
-              className="invite-loop-video full-viewport absolute left-1/2 top-1/2 w-[100vw] max-w-none -translate-x-1/2 -translate-y-1/2 object-cover object-center"
-              autoPlay
-              loop
-              muted
-              playsInline
-              preload="auto"
-              controls={false}
-              disablePictureInPicture
-              controlsList="nodownload nofullscreen noremoteplayback"
-              data-page="landing2-video"
-            />
+          <div
+            className="pointer-events-none absolute inset-0 overflow-hidden"
+            style={{ backgroundColor: PAGE_CREAM }}
+            aria-hidden
+          >
+            {isDesktop ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={LANDING2_DESKTOP}
+                alt=""
+                className="cover-media"
+                decoding="async"
+                fetchPriority="high"
+                draggable={false}
+              />
+            ) : (
+              <>
+                {/* Base: full invite */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={LANDING2_PHONE}
+                  alt=""
+                  className="cover-media"
+                  decoding="async"
+                  fetchPriority="high"
+                  draggable={false}
+                />
+                {/* Layer: bells on white — multiply drops the white plate */}
+                <video
+                  ref={videoRef}
+                  src={LANDING2A_VIDEO}
+                  className="invite-loop-video invite-bells-layer cover-media"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  preload="auto"
+                  controls={false}
+                  disablePictureInPicture
+                  controlsList="nodownload nofullscreen noremoteplayback"
+                  data-page="landing2-video"
+                />
+              </>
+            )}
           </div>
 
           {interactive && (
@@ -176,22 +205,11 @@ export function ThirdPage({
               className="absolute inset-0 z-[2] cursor-pointer border-0 bg-transparent"
               style={{
                 WebkitTapHighlightColor: "transparent",
-                // Allow vertical scroll on Safari/Chrome; tap still clicks
                 touchAction: "pan-y",
               }}
               aria-label="Continue to countdown and menu"
             />
           )}
-
-          <motion.p
-            className="pointer-events-none absolute inset-x-0 bottom-8 z-[1] text-center font-display text-[11px] font-light tracking-[0.35em] text-white/85 uppercase [text-shadow:0_1px_8px_rgba(0,0,0,0.35)] sm:bottom-10 sm:text-xs"
-            initial={{ opacity: 0, y: 8 }}
-            animate={revealed && inviteActive ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
-            transition={{ duration: 1, delay: 0.35, ease: luxuryEase }}
-            aria-hidden
-          >
-            Tap or scroll
-          </motion.p>
         </section>
 
         <PostRevealNav

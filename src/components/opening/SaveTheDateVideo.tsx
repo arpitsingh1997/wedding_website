@@ -53,7 +53,7 @@ export function SaveTheDateVideo({ open, onClose }: SaveTheDateVideoProps) {
       return;
     }
 
-    document.body.style.overflow = "hidden";
+    document.documentElement.classList.add("is-scroll-locked");
     setShowControls(true);
     const frame = requestAnimationFrame(() => {
       playVideo();
@@ -63,7 +63,7 @@ export function SaveTheDateVideo({ open, onClose }: SaveTheDateVideoProps) {
     return () => {
       cancelAnimationFrame(frame);
       clearHideTimer();
-      document.body.style.overflow = "";
+      document.documentElement.classList.remove("is-scroll-locked");
       videoRef.current?.pause();
     };
   }, [open, playVideo, scheduleHideControls, clearHideTimer]);
@@ -79,8 +79,7 @@ export function SaveTheDateVideo({ open, onClose }: SaveTheDateVideoProps) {
 
   return createPortal(
     <div
-      className="full-viewport fixed inset-0 z-[100020] flex items-center justify-center bg-black/90 p-4 sm:p-8"
-      style={{ width: "100vw" }}
+      className="full-viewport z-[100020] flex items-center justify-center bg-black/90 p-4 sm:p-8"
       role="dialog"
       aria-modal="true"
       aria-label="Save the date video"

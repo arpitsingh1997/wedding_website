@@ -1,16 +1,12 @@
-/** Call from the bow tap (same user gesture) so iOS allows muted autoplay. */
+/** Unlock muted invite-loop autoplay after the bow tap (iPhone). */
 export function kickInviteVideoPlayback() {
-  const video = document.querySelector<HTMLVideoElement>(
+  const el = document.querySelector(
     'video[data-page="landing2-video"]'
-  );
-  if (!video) return;
-  video.muted = true;
-  video.defaultMuted = true;
-  video.playsInline = true;
-  video.loop = true;
-  video.controls = false;
-  video.setAttribute("muted", "");
-  video.setAttribute("playsinline", "");
-  video.setAttribute("webkit-playsinline", "");
-  void video.play().catch(() => {});
+  ) as HTMLVideoElement | null;
+  if (!el) return;
+  el.muted = true;
+  el.defaultMuted = true;
+  el.playsInline = true;
+  el.loop = true;
+  void el.play().catch(() => {});
 }

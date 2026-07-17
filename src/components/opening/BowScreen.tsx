@@ -2,9 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { LANDING } from "./landing-assets";
+import { LANDING, LANDING_DESKTOP } from "./landing-assets";
 import { LandingArt } from "./LandingArt";
 import { kickInviteVideoPlayback } from "./invite-video";
+import { useIsDesktop } from "@/lib/use-is-desktop";
+import { DESKTOP_MIN_WIDTH } from "@/lib/viewport";
 
 type BowScreenProps = {
   isUnwrapping: boolean;
@@ -25,12 +27,13 @@ export function BowScreen({ isUnwrapping, onUnwrap, onUnwrapped }: BowScreenProp
   const [flapsOpening, setFlapsOpening] = useState(false);
   const advanced = useRef(false);
   const finished = useRef(false);
+  const isDesktop = useIsDesktop();
+  const bowSrc = isDesktop ? LANDING_DESKTOP : LANDING;
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Start CSS flap animation after a short hold (image already painted underneath)
   useEffect(() => {
     if (!isUnwrapping) {
       setFlapsOpening(false);
@@ -52,8 +55,10 @@ export function BowScreen({ isUnwrapping, onUnwrap, onUnwrapped }: BowScreenProp
   const handleTap = useCallback(() => {
     if (advanced.current || isUnwrapping) return;
     advanced.current = true;
-    // Same tap gesture unlocks muted autoplay on iOS
-    kickInviteVideoPlayback();
+    // Same tap unlocks muted autoplay on iPhone
+    if (!window.matchMedia(`(min-width: ${DESKTOP_MIN_WIDTH}px)`).matches) {
+      kickInviteVideoPlayback();
+    }
     onUnwrap();
   }, [isUnwrapping, onUnwrap]);
 
@@ -61,40 +66,38 @@ export function BowScreen({ isUnwrapping, onUnwrap, onUnwrapped }: BowScreenProp
 
   return createPortal(
     <div
-      className="full-viewport fixed inset-0 z-[100050]"
+      className="full-viewport z-[100050]"
       style={{
-        width: "100vw",
         backgroundColor: "transparent",
         pointerEvents: isUnwrapping ? "none" : "auto",
       }}
       data-bow-screen={isUnwrapping ? "unwrapping" : "closed"}
-      data-bow-version="css-1s-v7"
+      data-bow-version="css-1s-v9"
     >
-      {/* Flaps overlap 2px at center so no hairline seam shows */}
       <div
-        className={`bow-flap bow-flap-left full-viewport absolute inset-y-0 left-0 z-20 overflow-hidden ${flapsOpening ? "is-opening" : ""}`}
-        style={{ width: "calc(50% + 2px)", transformOrigin: "right center" }}
+        className={`bow-flap bow-flap-left absolute inset-y-0 left-0 z-20 h-full overflow-hidden ${flapsOpening ? "is-opening" : ""}`}
+        style={{
+          width: "calc(50% + 2px)",
+          transformOrigin: "right center",
+        }}
       >
         <LandingArt side="left" />
       </div>
 
       <div
-        className={`bow-flap bow-flap-right full-viewport absolute inset-y-0 right-0 z-20 overflow-hidden ${flapsOpening ? "is-opening" : ""}`}
-        style={{ width: "calc(50% + 2px)", transformOrigin: "left center" }}
+        className={`bow-flap bow-flap-right absolute inset-y-0 right-0 z-20 h-full overflow-hidden ${flapsOpening ? "is-opening" : ""}`}
+        style={{
+          width: "calc(50% + 2px)",
+          transformOrigin: "left center",
+        }}
       >
         <LandingArt side="right" />
       </div>
 
-      {/* Keep full cover until flaps actually start moving */}
       {!flapsOpening && (
-        <div className="pointer-events-none absolute inset-0 z-40" aria-hidden>
+        <div className="pointer-events-none absolute inset-0 z-40 overflow-hidden" aria-hidden>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={LANDING}
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover object-center"
-            draggable={false}
-          />
+          <img src={bowSrc} alt="" className="cover-media" draggable={false} />
         </div>
       )}
 
@@ -115,6 +118,7 @@ export function BowScreen({ isUnwrapping, onUnwrap, onUnwrapped }: BowScreenProp
           textTransform: "uppercase",
           opacity: isUnwrapping ? 0 : 1,
           transition: "opacity 1.2s ease",
+          paddingBottom: "env(safe-area-inset-bottom)",
         }}
       >
         {BOW_HINT}

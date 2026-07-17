@@ -10,7 +10,7 @@ export function OurStoryPanelScroll() {
           key={src}
           src={src}
           alt={`Our story, page ${index + 1} of ${OUR_STORY_SCROLL_PAGES.length}`}
-          className="block w-full max-w-[100vw] h-auto"
+          className="block h-auto w-full max-w-none"
           decoding={index === 0 ? "sync" : "async"}
           fetchPriority={index === 0 ? "high" : "auto"}
           draggable={false}

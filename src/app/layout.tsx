@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Pinyon_Script } from "next/font/google";
+import { VIEWPORT_BOOT_SCRIPT } from "@/lib/viewport-boot";
 import "./globals.css";
 
 const cormorant = Cormorant_Garamond({
@@ -24,6 +25,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
   viewportFit: "cover",
   themeColor: "#F3E9E6",
 };
@@ -39,8 +42,11 @@ export default function RootLayout({
       className={`${cormorant.variable} ${pinyon.variable}`}
       suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: VIEWPORT_BOOT_SCRIPT }} />
+      </head>
       <body
-        className={`${cormorant.className} min-h-screen overflow-hidden font-display antialiased`}
+        className={`${cormorant.className} font-display antialiased`}
         suppressHydrationWarning
       >
         {children}

@@ -8,7 +8,7 @@ export function OurStoryDesktop() {
       <img
         src={OUR_STORY_DESKTOP}
         alt="Our story"
-        className="block h-auto w-full max-w-[100vw]"
+        className="block h-auto w-full max-w-none"
         decoding="sync"
         fetchPriority="high"
         draggable={false}

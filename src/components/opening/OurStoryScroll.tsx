@@ -24,11 +24,11 @@ export function OurStoryScroll({ open, onClose }: OurStoryScrollProps) {
 
   useEffect(() => {
     if (!open) return;
-    document.body.style.overflow = "hidden";
+    document.documentElement.classList.add("is-scroll-locked");
     const panel = document.getElementById("our-story");
     panel?.scrollTo(0, 0);
     return () => {
-      document.body.style.overflow = "";
+      document.documentElement.classList.remove("is-scroll-locked");
     };
   }, [open]);
 
@@ -36,8 +36,11 @@ export function OurStoryScroll({ open, onClose }: OurStoryScrollProps) {
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[100020] select-none overflow-y-auto overflow-x-hidden overscroll-y-contain bg-[#FFFBF0]"
-      style={{ width: "100vw", minHeight: "100dvh", WebkitOverflowScrolling: "touch", userSelect: "none" }}
+      className="full-viewport z-[100020] select-none overflow-y-auto overflow-x-hidden overscroll-y-contain bg-[#FFFBF0]"
+      style={{
+        WebkitOverflowScrolling: "touch",
+        userSelect: "none",
+      }}
       role="dialog"
       aria-modal="true"
       aria-label="Our story"
@@ -46,15 +49,17 @@ export function OurStoryScroll({ open, onClose }: OurStoryScrollProps) {
       <button
         type="button"
         onClick={onClose}
-        onPointerUp={onClose}
-        className="fixed right-3 top-3 z-[100030] flex h-11 w-11 items-center justify-center rounded-full bg-[#FFFBF0]/90 font-display text-2xl leading-none text-black shadow-md backdrop-blur-sm lg:right-5 lg:top-5"
-        style={{ top: "max(0.75rem, env(safe-area-inset-top))" }}
+        className="fixed right-3 z-[100030] flex h-11 w-11 items-center justify-center rounded-full bg-[#FFFBF0]/90 font-display text-2xl leading-none text-black shadow-md backdrop-blur-sm lg:right-5"
+        style={{
+          top: "max(0.75rem, env(safe-area-inset-top))",
+          WebkitTapHighlightColor: "transparent",
+        }}
         aria-label="Close our story"
       >
         ×
       </button>
 
-      <main className="w-screen max-w-[100vw]">
+      <main className="w-full max-w-none">
         <div className="lg:hidden">
           <OurStoryPanelScroll />
         </div>

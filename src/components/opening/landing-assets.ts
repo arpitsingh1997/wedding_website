@@ -1,5 +1,8 @@
 /** Bump when you replace the file in public/images/ (forces Mac/browser to reload) */
-export const LANDING_VERSION = "bow-css-20s-20260714k";
+export const LANDING_VERSION = "desklanding-20260716a";
 
-/** Bow landing — always landing@2x.png (no SVG, no blossom overlay) */
+/** Bow landing — phone */
 export const LANDING = `/images/landing@2x.png?v=${LANDING_VERSION}`;
+
+/** Bow landing — desktop / Mac */
+export const LANDING_DESKTOP = `/images/desklanding@2x.png?v=${LANDING_VERSION}`;

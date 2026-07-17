@@ -1,8 +1,8 @@
 "use client";
 
-import { LANDING } from "./landing-assets";
-
-const BLUSH = "#F3E9E6";
+import { LANDING, LANDING_DESKTOP } from "./landing-assets";
+import { PAGE_CREAM } from "./page-cream";
+import { useIsDesktop } from "@/lib/use-is-desktop";
 
 type LandingArtProps = {
   side: "left" | "right";
@@ -10,27 +10,31 @@ type LandingArtProps = {
 
 export function LandingArt({ side }: LandingArtProps) {
   const isLeft = side === "left";
+  const isDesktop = useIsDesktop();
+  const src = isDesktop ? LANDING_DESKTOP : LANDING;
 
   return (
     <div
       className="pointer-events-none absolute inset-0 overflow-hidden"
-      style={{ backgroundColor: BLUSH }}
+      style={{ backgroundColor: PAGE_CREAM }}
       aria-hidden
     >
+      {/* Full-screen art clipped by the half-width flap (50% of parent) */}
       <div
-        className="full-viewport relative w-[100vw]"
+        className="absolute inset-y-0 h-full overflow-hidden"
         style={{
-          marginLeft: isLeft ? 0 : "-50vw",
+          width: "200%",
+          left: isLeft ? 0 : "-100%",
         }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={LANDING}
+          src={src}
           alt=""
           decoding="sync"
           fetchPriority="high"
           draggable={false}
-          className="full-viewport absolute left-1/2 top-1/2 w-[100vw] max-w-none -translate-x-1/2 -translate-y-1/2 object-cover object-center"
+          className="cover-media"
         />
       </div>
     </div>
