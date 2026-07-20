@@ -1,20 +1,19 @@
 /**
- * Luxury jewelry-box unveil (Web Audio).
+ * Luxury jewelry-box unveil — v2 (intentionally different from wind-chime).
  *
- * Soft clasp → velvet hinge → single high crystal ping with short elegant air.
- * Quiet, intimate, expensive — not a wind chime, doorbell, or paper rustle.
+ * Soft latch click → wood/velvet lid → one short glass ping.
+ * Dry and intimate (small box), not airy chimes or paper rustle.
  *
- * 0.00s  muted gold clasp release
- * 0.12s  velvet / wood hinge whisper
- * 0.42s  lid lifts (soft air)
- * 0.58s  single crystal ting (C6) + short bright reverb
- * ~1.3s  silence
+ * Signature: BUILD tag jewelry-box-v2 — if you still hear multi-note tubes,
+ * the old bundle is cached; hard-refresh.
  */
 
-const MASTER_VOLUME = 0.038;
-/** Crystal — C6 (gentle jewelry ping; sits above speech, not piercing) */
-const CRYSTAL_FREQ = 1046.5;
-const SEQUENCE_END_SEC = 1.45;
+export const BOW_CHIME_VERSION = "jewelry-box-v2";
+
+const MASTER_VOLUME = 0.052;
+/** Short glass ping — E6 (brighter / shorter than the old G5–A5 tubes) */
+const GLASS_FREQ = 1318.5;
+const SEQUENCE_END_SEC = 1.25;
 
 let sharedCtx: AudioContext | null = null;
 let masterGain: GainNode | null = null;
@@ -41,14 +40,7 @@ function noiseBurst(
   ctx: AudioContext,
   dest: AudioNode,
   t0: number,
-  {
-    duration,
-    gain,
-    filterType,
-    frequency,
-    Q,
-    attack = 0.01,
-  }: {
+  opts: {
     duration: number;
     gain: number;
     filterType: BiquadFilterType;
@@ -57,11 +49,12 @@ function noiseBurst(
     attack?: number;
   }
 ) {
+  const { duration, gain, filterType, frequency, Q, attack = 0.008 } = opts;
   const frames = Math.max(1, Math.ceil(ctx.sampleRate * duration));
   const buf = ctx.createBuffer(1, frames, ctx.sampleRate);
   const data = buf.getChannelData(0);
   for (let i = 0; i < frames; i++) {
-    data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (frames * 0.4));
+    data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (frames * 0.38));
   }
 
   const src = ctx.createBufferSource();
@@ -82,129 +75,128 @@ function noiseBurst(
   src.stop(t0 + duration + 0.02);
 }
 
-/** Tiny muted clasp — gold latch letting go */
-function playClasp(ctx: AudioContext, dest: AudioNode, t0: number) {
+/** Gold clasp — quick muted tick (mechanical, not a bell) */
+function playLatch(ctx: AudioContext, dest: AudioNode, t0: number) {
   const osc = ctx.createOscillator();
   const amp = ctx.createGain();
   const filter = ctx.createBiquadFilter();
-  osc.type = "triangle";
-  osc.frequency.setValueAtTime(420, t0);
-  osc.frequency.exponentialRampToValueAtTime(180, t0 + 0.04);
-  filter.type = "lowpass";
-  filter.frequency.value = 900;
+  osc.type = "square";
+  osc.frequency.setValueAtTime(980, t0);
+  osc.frequency.exponentialRampToValueAtTime(220, t0 + 0.03);
+  filter.type = "bandpass";
+  filter.frequency.value = 1100;
+  filter.Q.value = 2.2;
   amp.gain.setValueAtTime(0.0001, t0);
-  amp.gain.exponentialRampToValueAtTime(0.35, t0 + 0.004);
-  amp.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.055);
+  amp.gain.exponentialRampToValueAtTime(0.22, t0 + 0.002);
+  amp.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.04);
   osc.connect(filter);
   filter.connect(amp);
   amp.connect(dest);
   osc.start(t0);
-  osc.stop(t0 + 0.07);
+  osc.stop(t0 + 0.05);
 
-  // Soft felt pad under the click
   noiseBurst(ctx, dest, t0, {
-    duration: 0.05,
-    gain: 0.06,
+    duration: 0.035,
+    gain: 0.08,
+    filterType: "highpass",
+    frequency: 2400,
+    Q: 0.8,
+    attack: 0.001,
+  });
+}
+
+/** Soft wood body — the box itself (low, short) */
+function playWoodBody(ctx: AudioContext, dest: AudioNode, t0: number) {
+  const osc = ctx.createOscillator();
+  const amp = ctx.createGain();
+  const filter = ctx.createBiquadFilter();
+  osc.type = "sine";
+  osc.frequency.setValueAtTime(95, t0);
+  filter.type = "lowpass";
+  filter.frequency.value = 220;
+  amp.gain.setValueAtTime(0.0001, t0);
+  amp.gain.exponentialRampToValueAtTime(0.45, t0 + 0.02);
+  amp.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.28);
+  osc.connect(filter);
+  filter.connect(amp);
+  amp.connect(dest);
+  osc.start(t0);
+  osc.stop(t0 + 0.32);
+}
+
+/** Velvet lid glide */
+function playVelvetLid(ctx: AudioContext, dest: AudioNode, t0: number) {
+  noiseBurst(ctx, dest, t0, {
+    duration: 0.35,
+    gain: 0.09,
     filterType: "lowpass",
-    frequency: 380,
-    Q: 0.6,
-    attack: 0.003,
+    frequency: 320,
+    Q: 0.5,
+    attack: 0.06,
   });
-}
-
-/** Velvet-lined hinge — quiet low wood/silk glide */
-function playVelvetHinge(ctx: AudioContext, dest: AudioNode, t0: number) {
-  noiseBurst(ctx, dest, t0, {
-    duration: 0.42,
-    gain: 0.07,
-    filterType: "lowpass",
-    frequency: 280,
-    Q: 0.45,
-    attack: 0.08,
-  });
-  noiseBurst(ctx, dest, t0 + 0.06, {
-    duration: 0.32,
-    gain: 0.035,
+  noiseBurst(ctx, dest, t0 + 0.05, {
+    duration: 0.22,
+    gain: 0.04,
     filterType: "bandpass",
-    frequency: 640,
-    Q: 0.7,
-    attack: 0.07,
+    frequency: 780,
+    Q: 0.9,
+    attack: 0.04,
   });
 }
 
-/** Lid rising — soft air, almost breath */
-function playLidLift(ctx: AudioContext, dest: AudioNode, t0: number) {
-  noiseBurst(ctx, dest, t0, {
-    duration: 0.28,
-    gain: 0.055,
-    filterType: "bandpass",
-    frequency: 1200,
-    Q: 0.55,
-    attack: 0.05,
-  });
+/**
+ * One glass ping via light FM — reads as crystal in a box, not wind-chime tubes.
+ */
+function playGlassPing(ctx: AudioContext, dest: AudioNode, t0: number) {
+  const carrier = ctx.createOscillator();
+  const mod = ctx.createOscillator();
+  const modGain = ctx.createGain();
+  const amp = ctx.createGain();
+  const filter = ctx.createBiquadFilter();
+
+  carrier.type = "sine";
+  mod.type = "sine";
+  carrier.frequency.setValueAtTime(GLASS_FREQ, t0);
+  mod.frequency.setValueAtTime(GLASS_FREQ * 2.01, t0);
+
+  // Brief FM sparkle, then pure tone
+  modGain.gain.setValueAtTime(90, t0);
+  modGain.gain.exponentialRampToValueAtTime(0.001, t0 + 0.06);
+
+  filter.type = "lowpass";
+  filter.frequency.setValueAtTime(4200, t0);
+  filter.frequency.exponentialRampToValueAtTime(1800, t0 + 0.4);
+
+  amp.gain.setValueAtTime(0.0001, t0);
+  amp.gain.exponentialRampToValueAtTime(0.55, t0 + 0.006);
+  amp.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.55);
+
+  mod.connect(modGain);
+  modGain.connect(carrier.frequency);
+  carrier.connect(filter);
+  filter.connect(amp);
+  amp.connect(dest);
+
+  carrier.start(t0);
+  mod.start(t0);
+  carrier.stop(t0 + 0.6);
+  mod.stop(t0 + 0.6);
+
+  // Quiet octave above — tiny gem glint only
+  const glint = ctx.createOscillator();
+  const glintAmp = ctx.createGain();
+  glint.type = "sine";
+  glint.frequency.setValueAtTime(GLASS_FREQ * 2, t0);
+  glintAmp.gain.setValueAtTime(0.0001, t0);
+  glintAmp.gain.exponentialRampToValueAtTime(0.08, t0 + 0.005);
+  glintAmp.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.22);
+  glint.connect(glintAmp);
+  glintAmp.connect(dest);
+  glint.start(t0);
+  glint.stop(t0 + 0.25);
 }
 
-/** Short bright jewelry-case air (not a large hall) */
-function createJewelImpulse(ctx: AudioContext, seconds = 0.85): AudioBuffer {
-  const rate = ctx.sampleRate;
-  const len = Math.ceil(rate * seconds);
-  const buf = ctx.createBuffer(2, len, rate);
-  for (let ch = 0; ch < 2; ch++) {
-    const data = buf.getChannelData(ch);
-    for (let i = 0; i < len; i++) {
-      const t = i / rate;
-      const env = Math.exp(-t * 5.5) * (1 - t / seconds);
-      const early = t < 0.02 ? Math.exp(-t * 90) * 0.4 : 0;
-      data[i] =
-        (Math.random() * 2 - 1) * env * 0.4 +
-        (Math.random() * 2 - 1) * early * 0.25;
-      if (ch === 1) data[i] *= 0.94;
-    }
-  }
-  return buf;
-}
-
-/** Single clear crystal — one gem catching the light */
-function playCrystalPing(
-  ctx: AudioContext,
-  dryDest: AudioNode,
-  wetDest: AudioNode,
-  t0: number
-) {
-  const freq = CRYSTAL_FREQ;
-
-  noiseBurst(ctx, dryDest, t0, {
-    duration: 0.018,
-    gain: 0.05,
-    filterType: "bandpass",
-    frequency: freq * 1.5,
-    Q: 1.4,
-    attack: 0.002,
-  });
-
-  const partials = [
-    { ratio: 1, gain: 0.7, decay: 0.85 },
-    { ratio: 2.01, gain: 0.14, decay: 0.5 },
-    { ratio: 3.0, gain: 0.04, decay: 0.32 },
-  ];
-
-  for (const p of partials) {
-    const osc = ctx.createOscillator();
-    const amp = ctx.createGain();
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(freq * p.ratio, t0);
-    amp.gain.setValueAtTime(0.0001, t0);
-    amp.gain.exponentialRampToValueAtTime(p.gain, t0 + 0.008);
-    amp.gain.exponentialRampToValueAtTime(0.0001, t0 + p.decay);
-    osc.connect(amp);
-    amp.connect(dryDest);
-    amp.connect(wetDest);
-    osc.start(t0);
-    osc.stop(t0 + p.decay + 0.05);
-  }
-}
-
-/** Begin on the bow tap (iOS requires the user gesture). */
+/** Begin on the bow tap (iOS gesture). */
 export function startBowChime() {
   if (typeof window === "undefined") return;
   stopBowChime(true);
@@ -222,29 +214,15 @@ export function startBowChime() {
   masterGain.gain.setValueAtTime(MASTER_VOLUME, now);
   masterGain.connect(ctx.destination);
 
-  const dry = ctx.createGain();
-  dry.gain.value = 1;
-  dry.connect(masterGain);
+  // Dry only — no long hall reverb (that made it sound like wind chimes)
+  playLatch(ctx, masterGain, now + 0.0);
+  playWoodBody(ctx, masterGain, now + 0.02);
+  playVelvetLid(ctx, masterGain, now + 0.18);
+  playGlassPing(ctx, masterGain, now + 0.48);
 
-  const convolver = ctx.createConvolver();
-  convolver.buffer = createJewelImpulse(ctx, 0.85);
-  const wet = ctx.createGain();
-  wet.gain.value = 0.0001;
-  wet.gain.setValueAtTime(0.0001, now + 0.55);
-  wet.gain.exponentialRampToValueAtTime(0.7, now + 0.6);
-  wet.gain.exponentialRampToValueAtTime(0.35, now + 0.95);
-  wet.gain.exponentialRampToValueAtTime(0.0001, now + 1.35);
-
-  const wetInput = ctx.createGain();
-  wetInput.gain.value = 1;
-  wetInput.connect(convolver);
-  convolver.connect(wet);
-  wet.connect(masterGain);
-
-  playClasp(ctx, dry, now + 0.0);
-  playVelvetHinge(ctx, dry, now + 0.12);
-  playLidLift(ctx, dry, now + 0.42);
-  playCrystalPing(ctx, dry, wetInput, now + 0.58);
+  if (typeof document !== "undefined") {
+    document.documentElement.dataset.bowChime = BOW_CHIME_VERSION;
+  }
 
   stopTimer = window.setTimeout(() => {
     stopTimer = null;
@@ -252,7 +230,6 @@ export function startBowChime() {
   }, SEQUENCE_END_SEC * 1000);
 }
 
-/** Soft teardown. `force` cuts immediately (retap / unmount). */
 export function stopBowChime(force = false) {
   clearStopTimer();
   if (!playing && !sharedCtx) return;
@@ -266,7 +243,7 @@ export function stopBowChime(force = false) {
   if (!ctx || !master) return;
 
   const now = ctx.currentTime;
-  const fade = force ? 0.06 : 0.28;
+  const fade = force ? 0.05 : 0.22;
   try {
     master.gain.cancelScheduledValues(now);
     master.gain.setValueAtTime(Math.max(master.gain.value, 0.0001), now);
@@ -278,5 +255,5 @@ export function stopBowChime(force = false) {
   stopTimer = window.setTimeout(() => {
     stopTimer = null;
     void ctx.close().catch(() => {});
-  }, fade * 1000 + 60);
+  }, fade * 1000 + 50);
 }

@@ -44,6 +44,12 @@ export default function RootLayout({
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: VIEWPORT_BOOT_SCRIPT }} />
+        {/* Never restore prior scroll — always enter at the closed bow / invite top */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{if("scrollRestoration"in history)history.scrollRestoration="manual";}catch(e){}if(location.hash)history.replaceState(null,"",location.pathname+location.search);window.scrollTo(0,0);})();`,
+          }}
+        />
       </head>
       <body
         className={`${cormorant.className} font-display antialiased`}
