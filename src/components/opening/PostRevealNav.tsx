@@ -14,35 +14,35 @@ const MOBILE_NAV_ITEMS = [
     label: "Our Story",
     href: "#our-story",
     id: "our-story" as const,
-    top: "41.2%",
-    left: "8%",
-    width: "84%",
-    height: "5.8%",
+    top: "40.7%",
+    left: "14%",
+    width: "72%",
+    height: "5.2%",
   },
   {
     label: "Save the Date",
     href: "#save-the-date",
     id: "save-the-date" as const,
-    top: "49.2%",
-    left: "8%",
-    width: "84%",
-    height: "5.8%",
+    top: "50.2%",
+    left: "14%",
+    width: "72%",
+    height: "5.2%",
   },
   {
     label: "Wedding Events",
     href: "#events",
-    top: "60.2%",
-    left: "8%",
-    width: "84%",
-    height: "5.8%",
+    top: "59.6%",
+    left: "14%",
+    width: "72%",
+    height: "5.2%",
   },
   {
     label: "Celebrating Together",
     href: "#celebrating-together",
-    top: "68.0%",
-    left: "8%",
-    width: "84%",
-    height: "11.0%",
+    top: "69.1%",
+    left: "14%",
+    width: "72%",
+    height: "9.5%",
   },
 ] as const;
 
@@ -56,18 +56,18 @@ const DESKTOP_NAV_ITEMS = [
     label: "Our Story",
     href: "#our-story",
     id: "our-story" as const,
-    top: "41.1%",
+    top: "42.2%",
     left: "31.3%",
     width: "16.4%",
-    height: "7.8%",
+    height: "5.8%",
   },
   {
     label: "Wedding Events",
     href: "#events",
-    top: "41.1%",
+    top: "42.2%",
     left: "52.2%",
     width: "16.4%",
-    height: "7.8%",
+    height: "5.8%",
   },
   {
     label: "Save the Date",
@@ -146,7 +146,7 @@ export function PostRevealNav({
         <img
           src={artSrc}
           alt="Countdown to our forever — Dharmi and Arpit"
-          className="block h-auto w-full max-w-none select-none"
+          className="crisp-image block h-auto w-full max-w-none select-none"
           decoding="async"
           fetchPriority="high"
           draggable={false}
@@ -154,7 +154,7 @@ export function PostRevealNav({
 
         <div
           className="pointer-events-none absolute inset-x-0 z-[1] flex justify-center px-5"
-          style={{ top: isDesktop ? "28%" : "24.5%" }}
+          style={{ top: isDesktop ? "28%" : "25.5%" }}
         >
           <WeddingCountdown />
         </div>

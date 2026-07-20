@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import { useIsDesktop } from "@/lib/use-is-desktop";
+import { kickOurStoryAudio, stopOurStoryAudio } from "./our-story-audio";
 import { OurStoryScroll } from "./OurStoryScroll";
 import { PAGE_CREAM } from "./page-cream";
 import { PostRevealNav } from "./PostRevealNav";
@@ -9,6 +10,7 @@ import { SaveTheDateVideo } from "./SaveTheDateVideo";
 import {
   LANDING2_DESKTOP,
   LANDING2_PHONE,
+  LANDING2A_DESKTOP_VIDEO,
   LANDING2A_VIDEO,
   LANDING3_DESKTOP,
   LANDING3_SCROLL,
@@ -72,6 +74,8 @@ function useLoopingInviteVideo(
   }, [ref, enabled]);
 }
 
+const AUTO_SCROLL_DELAY_MS = 60_000;
+
 /** Invitation page — phone PNG + video layer / desktop art, then countdown + nav */
 export function ThirdPage({
   inviteActive = true,
@@ -88,7 +92,7 @@ export function ThirdPage({
     return () => cancelAnimationFrame(frame);
   }, []);
 
-  useLoopingInviteVideo(videoRef, !isDesktop);
+  useLoopingInviteVideo(videoRef, true);
 
   useEffect(() => {
     const img = new Image();
@@ -102,8 +106,33 @@ export function ThirdPage({
     window.scrollTo({ top, behavior: "smooth" });
   }, []);
 
+  // If the guest stays on the invite, ease them to the countdown after a minute
   useEffect(() => {
-    if (!inviteActive || isDesktop) return;
+    if (!interactive) return;
+
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      if (cancelled || window.scrollY >= 12) return;
+      goToCountdown();
+    }, AUTO_SCROLL_DELAY_MS);
+
+    const onScroll = () => {
+      if (window.scrollY >= 12) {
+        cancelled = true;
+        window.clearTimeout(timer);
+      }
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, [interactive, goToCountdown]);
+
+  useEffect(() => {
+    if (!inviteActive) return;
     const el = videoRef.current;
     if (!el) return;
     el.muted = true;
@@ -112,10 +141,13 @@ export function ThirdPage({
 
   const openOurStory = useCallback(() => {
     setSaveTheDateOpen(false);
+    // Same tap unlocks unmuted audio on iPhone
+    kickOurStoryAudio();
     setOurStoryOpen(true);
   }, []);
 
   const closeOurStory = useCallback(() => {
+    stopOurStoryAudio();
     setOurStoryOpen(false);
   }, []);
 
@@ -157,45 +189,31 @@ export function ThirdPage({
             style={{ backgroundColor: PAGE_CREAM }}
             aria-hidden
           >
-            {isDesktop ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={LANDING2_DESKTOP}
-                alt=""
-                className="cover-media"
-                decoding="async"
-                fetchPriority="high"
-                draggable={false}
-              />
-            ) : (
-              <>
-                {/* Base: full invite */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={LANDING2_PHONE}
-                  alt=""
-                  className="cover-media"
-                  decoding="async"
-                  fetchPriority="high"
-                  draggable={false}
-                />
-                {/* Layer: bells on white — multiply drops the white plate */}
-                <video
-                  ref={videoRef}
-                  src={LANDING2A_VIDEO}
-                  className="invite-loop-video invite-bells-layer cover-media"
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  preload="auto"
-                  controls={false}
-                  disablePictureInPicture
-                  controlsList="nodownload nofullscreen noremoteplayback"
-                  data-page="landing2-video"
-                />
-              </>
-            )}
+            {/* Base invite art */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={isDesktop ? LANDING2_DESKTOP : LANDING2_PHONE}
+              alt=""
+              className="cover-media"
+              decoding="async"
+              fetchPriority="high"
+              draggable={false}
+            />
+            {/* Bells on white — multiply drops the white plate */}
+            <video
+              ref={videoRef}
+              src={isDesktop ? LANDING2A_DESKTOP_VIDEO : LANDING2A_VIDEO}
+              className="invite-loop-video invite-bells-layer cover-media"
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="auto"
+              controls={false}
+              disablePictureInPicture
+              controlsList="nodownload nofullscreen noremoteplayback"
+              data-page="landing2-video"
+            />
           </div>
 
           {interactive && (

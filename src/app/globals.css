@@ -130,6 +130,10 @@
 .invite-bells-layer {
   mix-blend-mode: multiply;
   -webkit-mix-blend-mode: multiply;
+  /* Keep the bells layer from picking up the desktop cover-media GPU blur */
+  transform: none;
+  backface-visibility: visible;
+  -webkit-backface-visibility: visible;
 }
 
 .invite-loop-video::-webkit-media-controls {
@@ -183,4 +187,15 @@
   border: 0;
   object-fit: cover;
   object-position: center center;
+  image-rendering: auto;
+  -webkit-user-drag: none;
+}
+
+/* Desktop: prefer sharper decode for full-bleed invite / bow frames */
+@media (min-width: 1024px) {
+  .cover-media {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
 }

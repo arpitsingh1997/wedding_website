@@ -1,4 +1,4 @@
-export const BUILD = "landing2-base-bells-20260716i";
+export const BUILD = "desklanding3-20260719t";
 
 /** Phone invite — base art (Desktop landing2@2x.png) */
 export const LANDING2_PHONE = `/images/landing2@2x.png?${BUILD}`;
@@ -10,7 +10,10 @@ export const LANDING2A_VIDEO = `/images/landing2a@2x.mp4?${BUILD}`;
 export const LANDING2_POSTER = LANDING2_PHONE;
 
 /** Invitation screen — desktop static art */
-export const LANDING2_DESKTOP = `/images/desklanding2@2x.svg?${BUILD}`;
+export const LANDING2_DESKTOP = `/images/desklanding2@2x.png?${BUILD}`;
+
+/** Desktop invite — bells overlay (desklanding2a@2x.mp4), white plate + multiply */
+export const LANDING2A_DESKTOP_VIDEO = `/images/desklanding2a@2x.mp4?${BUILD}`;
 
 /** Scroll-down page — phone countdown + vertical nav artwork */
 export const LANDING3_SCROLL = `/images/landing3@2x.png?${BUILD}`;

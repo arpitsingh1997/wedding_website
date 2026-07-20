@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { kickOurStoryAudio, stopOurStoryAudio } from "./our-story-audio";
 import { OurStoryDesktop } from "./our-story/OurStoryDesktop";
 import { OurStoryPanelScroll } from "./our-story/OurStoryPanelScroll";
 
@@ -23,11 +24,17 @@ export function OurStoryScroll({ open, onClose }: OurStoryScrollProps) {
   }, []);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      stopOurStoryAudio();
+      return;
+    }
     document.documentElement.classList.add("is-scroll-locked");
     const panel = document.getElementById("our-story");
     panel?.scrollTo(0, 0);
+    // Retry play after mount (tap already kicked; this covers desktop)
+    kickOurStoryAudio();
     return () => {
+      stopOurStoryAudio();
       document.documentElement.classList.remove("is-scroll-locked");
     };
   }, [open]);
