@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { startBowChime, stopBowChime } from "./bow-chime";
 import { LANDING, LANDING_DESKTOP } from "./landing-assets";
 import { LandingArt } from "./LandingArt";
 import { kickInviteVideoPlayback } from "./invite-video";
@@ -32,6 +33,7 @@ export function BowScreen({ isUnwrapping, onUnwrap, onUnwrapped }: BowScreenProp
 
   useEffect(() => {
     setMounted(true);
+    return () => stopBowChime(true);
   }, []);
 
   useEffect(() => {
@@ -55,6 +57,7 @@ export function BowScreen({ isUnwrapping, onUnwrap, onUnwrapped }: BowScreenProp
   const handleTap = useCallback(() => {
     if (advanced.current || isUnwrapping) return;
     advanced.current = true;
+    startBowChime();
     // Same tap unlocks muted autoplay on iPhone
     if (!window.matchMedia(`(min-width: ${DESKTOP_MIN_WIDTH}px)`).matches) {
       kickInviteVideoPlayback();
