@@ -191,6 +191,24 @@
   -webkit-user-drag: none;
 }
 
+/*
+ * Phone vs desktop art layers — CSS media, not React state, so desktop
+ * always gets desklanding2 / desklanding3 (no phone-art flash).
+ */
+.art-desktop {
+  display: none !important;
+}
+
+@media (min-width: 1024px) {
+  .art-phone {
+    display: none !important;
+  }
+
+  .art-desktop {
+    display: block !important;
+  }
+}
+
 /* Desktop: prefer sharper decode for full-bleed invite / bow frames */
 @media (min-width: 1024px) {
   .cover-media {

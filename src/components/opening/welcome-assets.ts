@@ -1,4 +1,4 @@
-export const BUILD = "desktop-picture-flow-20260721m";
+export const BUILD = "force-desklanding2-3-20260721n";
 
 /** Phone invite — base art (Desktop landing2@2x.png) */
 export const LANDING2_PHONE = `/images/landing2@2x.png?${BUILD}`;

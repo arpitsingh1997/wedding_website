@@ -91,7 +91,8 @@ export function ThirdPage({
   /** Fade the invite/scroll surface out while opening a destination */
   const [homeFadedOut, setHomeFadedOut] = useState(false);
   const [navigationLocked, setNavigationLocked] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const phoneVideoRef = useRef<HTMLVideoElement>(null);
+  const deskVideoRef = useRef<HTMLVideoElement>(null);
   const isDesktop = useIsDesktop();
   const navBusy = useRef(false);
 
@@ -100,28 +101,19 @@ export function ThirdPage({
     return () => cancelAnimationFrame(frame);
   }, []);
 
-  useLoopingInviteVideo(videoRef, true);
-
-  // Keep invite bells on the correct phone/desktop file after layout resolves
-  useEffect(() => {
-    const el = videoRef.current;
-    if (!el) return;
-    const next = isDesktop ? LANDING2A_DESKTOP_VIDEO : LANDING2A_VIDEO;
-    const marker = isDesktop ? "desklanding2a" : "landing2a@2x";
-    if (el.src.includes(marker)) return;
-    el.src = next;
-    el.load();
-    playMutedLoopVideo(el);
-  }, [isDesktop]);
+  useLoopingInviteVideo(phoneVideoRef, true);
+  useLoopingInviteVideo(deskVideoRef, true);
 
   useEffect(() => {
-    const img = new Image();
-    img.src = isDesktop ? LANDING3_DESKTOP : LANDING3_SCROLL;
-    // Prefetch both invite frames so desktop never waits on bow open
+    // Prefetch desktop + phone frames so the bow open never waits
     const invitePhone = new Image();
     invitePhone.src = LANDING2_PHONE;
     const inviteDesk = new Image();
     inviteDesk.src = LANDING2_DESKTOP;
+    const scrollPhone = new Image();
+    scrollPhone.src = LANDING3_SCROLL;
+    const scrollDesk = new Image();
+    scrollDesk.src = LANDING3_DESKTOP;
     const celebrating = new Image();
     celebrating.src = CELEBRATING_TOGETHER;
     // Warm the bells decode so the multiply layer doesn’t flash soft/white
@@ -137,7 +129,7 @@ export function ThirdPage({
     saveTheDate.preload = "auto";
     saveTheDate.playsInline = true;
     saveTheDate.src = SAVE_THE_DATE_VIDEO;
-  }, [isDesktop]);
+  }, []);
 
   const goToCountdown = useCallback(() => {
     const menu = document.getElementById("countdown-nav");
@@ -173,10 +165,8 @@ export function ThirdPage({
 
   useEffect(() => {
     if (!inviteActive) return;
-    const el = videoRef.current;
-    if (!el) return;
-    el.muted = true;
-    void el.play().catch(() => {});
+    playMutedLoopVideo(phoneVideoRef.current);
+    playMutedLoopVideo(deskVideoRef.current);
   }, [inviteActive, isDesktop]);
 
   const closeAllOverlays = useCallback(() => {
@@ -300,24 +290,44 @@ export function ThirdPage({
             style={{ backgroundColor: PAGE_CREAM }}
             aria-hidden
           >
-            {/* Base invite art — phone vs desktop via <picture> (no JS flash) */}
-            <picture>
-              <source media="(min-width: 1024px)" srcSet={LANDING2_DESKTOP} />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={LANDING2_PHONE}
-                alt=""
-                className="cover-media"
-                decoding="async"
-                fetchPriority="high"
-                draggable={false}
-              />
-            </picture>
-            {/* Bells on white — multiply drops the white plate. Both sources; CSS picks one. */}
+            {/* Phone invite + bells */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={LANDING2_PHONE}
+              alt=""
+              className="cover-media art-phone"
+              decoding="async"
+              fetchPriority="high"
+              draggable={false}
+            />
             <video
-              ref={videoRef}
-              src={isDesktop ? LANDING2A_DESKTOP_VIDEO : LANDING2A_VIDEO}
-              className="invite-loop-video invite-bells-layer cover-media"
+              ref={phoneVideoRef}
+              src={LANDING2A_VIDEO}
+              className="invite-loop-video invite-bells-layer cover-media art-phone"
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="auto"
+              controls={false}
+              disablePictureInPicture
+              controlsList="nodownload nofullscreen noremoteplayback"
+              data-page="landing2-video"
+            />
+            {/* Desktop invite + bells — desklanding2@2x + desklanding2a */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={LANDING2_DESKTOP}
+              alt=""
+              className="cover-media art-desktop"
+              decoding="async"
+              fetchPriority="high"
+              draggable={false}
+            />
+            <video
+              ref={deskVideoRef}
+              src={LANDING2A_DESKTOP_VIDEO}
+              className="invite-loop-video invite-bells-layer cover-media art-desktop"
               autoPlay
               loop
               muted
