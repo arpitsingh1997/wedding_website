@@ -20,6 +20,7 @@ export function SaveTheDateVideo({
 }: SaveTheDateVideoProps) {
   const [mounted, setMounted] = useState(false);
   const [showControls, setShowControls] = useState(true);
+  const [playbackKey, setPlaybackKey] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const hideTimer = useRef<number | null>(null);
   const { rendered, fadeStyle } = useInviteOverlayFade(open, revealed);
@@ -48,9 +49,21 @@ export function SaveTheDateVideo({
   const playVideo = useCallback(() => {
     const el = videoRef.current;
     if (!el) return;
-    el.currentTime = 0;
     el.muted = false;
-    void el.play().catch(() => {});
+    const tryPlay = () => {
+      void el.play().catch(() => {});
+    };
+    if (el.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+      try {
+        el.currentTime = 0;
+      } catch {
+        // ignore seek before metadata
+      }
+      tryPlay();
+      return;
+    }
+    el.load();
+    tryPlay();
   }, []);
 
   useEffect(() => {
@@ -62,6 +75,9 @@ export function SaveTheDateVideo({
 
     document.documentElement.classList.add("is-scroll-locked");
     setShowControls(true);
+    // Remount the <video> each open so Vercel/CDN always reloads a fresh source
+    setPlaybackKey((k) => k + 1);
+
     const frame = requestAnimationFrame(() => {
       playVideo();
       scheduleHideControls();
@@ -103,6 +119,7 @@ export function SaveTheDateVideo({
       </button>
 
       <video
+        key={playbackKey}
         ref={videoRef}
         src={SAVE_THE_DATE_VIDEO}
         className="max-h-[82vh] max-h-[82dvh] w-full max-w-4xl rounded-sm object-contain"
@@ -110,6 +127,7 @@ export function SaveTheDateVideo({
         playsInline
         preload="auto"
         onLoadedData={playVideo}
+        onCanPlay={playVideo}
         onClick={revealControlsBriefly}
         data-video="save-the-date"
       />

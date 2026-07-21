@@ -113,10 +113,11 @@ export function CelebratingTogether({
       <button
         type="button"
         onClick={onClose}
-        className="absolute right-3 z-[100030] flex h-11 w-11 items-center justify-center rounded-full font-display text-2xl leading-none text-black shadow-md backdrop-blur-sm lg:right-5"
+        className="absolute right-3 z-[100030] flex h-11 w-11 items-center justify-center rounded-full font-display text-2xl leading-none lg:right-5"
         style={{
           top: "max(0.75rem, env(safe-area-inset-top))",
-          backgroundColor: `${PAGE_CREAM}E6`,
+          color: PAGE_CREAM,
+          backgroundColor: "transparent",
           WebkitTapHighlightColor: "transparent",
         }}
         aria-label="Close celebrating together"
