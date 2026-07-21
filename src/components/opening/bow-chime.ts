@@ -2,12 +2,12 @@
  * Bow unveil — soft celesta / music-box nod to “You Are My Sunshine.”
  *
  * First 3 notes only (not a recognizable tune):
- *   tonic → tonic → perfect 5th  (G–G–D)
+ *   tonic → major 3rd → perfect 5th  (G–B–D triad)
  * Slow spacing (~300 ms), long airy reverb, quiet glass texture under.
  * Elegant & delicate — not whimsical or magical.
  */
 
-export const BOW_CHIME_VERSION = "celesta-sunshine-v3";
+export const BOW_CHIME_VERSION = "celesta-sunshine-v4";
 
 const MASTER_VOLUME = 0.038;
 /** Cue length including reverb tail */
@@ -15,9 +15,9 @@ const SEQUENCE_END_SEC = 1.2;
 
 /**
  * Celesta register — soft, high, not piercing.
- * G5–G5–D6 — opens like sunshine, resolves up a fifth.
+ * G5–B5–D6 — ascending major triad (sunshine interval shape).
  */
-const MOTIF_HZ = [783.99, 783.99, 1174.66] as const;
+const MOTIF_HZ = [783.99, 987.77, 1174.66] as const;
 /** Wide, unhurried spacing between note attacks */
 const NOTE_GAP_SEC = 0.3;
 const NOTE_STARTS = MOTIF_HZ.map((_, i) => i * NOTE_GAP_SEC);
@@ -251,8 +251,8 @@ export function startBowChime() {
 
   playGlassTexture(ctx, dry, wetInput, now);
 
-  // Motif: soft → soft → slightly fuller close
-  const velocities = [0.78, 0.72, 0.88];
+  // Motif: soft rise through the triad
+  const velocities = [0.76, 0.82, 0.88];
   for (let i = 0; i < MOTIF_HZ.length; i++) {
     playCelestaNote(
       ctx,
