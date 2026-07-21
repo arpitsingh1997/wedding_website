@@ -1,4 +1,4 @@
-export const BUILD = "new-desklanding-nav-20260721q";
+export const BUILD = "new-desklanding-nav-20260721r";
 
 /** Phone invite — base art (Desktop landing2@2x.png) */
 export const LANDING2_PHONE = `/images/landing2@2x.png?${BUILD}`;
