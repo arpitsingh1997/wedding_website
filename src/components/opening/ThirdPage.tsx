@@ -28,6 +28,7 @@ import {
   LANDING2A_VIDEO,
   LANDING3_DESKTOP,
   LANDING3_SCROLL,
+  SAVE_THE_DATE_VIDEO,
 } from "./welcome-assets";
 
 type ThirdPageProps = {
@@ -114,6 +115,11 @@ export function ThirdPage({
     bells.src = CELEBRATING_TOGETHER_BELLS;
     // Warm Our Story clip so tap → sound is immediate
     preloadOurStoryAudio();
+    // Warm Save the Date so the overlay can play on first tap
+    const saveTheDate = document.createElement("video");
+    saveTheDate.preload = "auto";
+    saveTheDate.playsInline = true;
+    saveTheDate.src = SAVE_THE_DATE_VIDEO;
   }, [isDesktop]);
 
   const goToCountdown = useCallback(() => {

@@ -1,4 +1,4 @@
-export const BUILD = "conflict-fix-jewelry-5menu-20260721a";
+export const BUILD = "std-h264-cream-x-20260721b";
 
 /** Phone invite — base art (Desktop landing2@2x.png) */
 export const LANDING2_PHONE = `/images/landing2@2x.png?${BUILD}`;
