@@ -65,53 +65,56 @@ const MOBILE_NAV_ITEMS = [
 ] as const;
 
 /**
- * Desktop hit boxes — desklanding3@2x.png (1366×768).
- * 2×2 grid + More of Us (Instagram), matching mobile destinations.
+ * Desktop hit boxes — new desklanding3@2x.png (1366×768):
+ * Row1: Our Story | Events
+ * Row2: Save the Date | More of Us (Instagram)
+ * Row3: Celebrating Together (centered)
  */
+const DESKTOP_BTN = {
+  width: "16.4%",
+  height: "5.6%",
+} as const;
+
 const DESKTOP_NAV_ITEMS = [
   {
     label: "Our Story",
     href: "#our-story",
     id: "our-story" as const,
-    top: "42.2%",
+    top: "40.2%",
     left: "31.3%",
-    width: "16.4%",
-    height: "5.8%",
+    ...DESKTOP_BTN,
   },
   {
     label: "Wedding Events",
     href: "#events",
-    top: "42.2%",
+    top: "40.2%",
     left: "52.2%",
-    width: "16.4%",
-    height: "5.8%",
+    ...DESKTOP_BTN,
   },
   {
     label: "Save the Date",
     href: "#save-the-date",
     id: "save-the-date" as const,
-    top: "55.1%",
+    top: "49.0%",
     left: "31.3%",
-    width: "16.4%",
-    height: "8.8%",
-  },
-  {
-    label: "Celebrating Together",
-    href: "#celebrating-together",
-    id: "celebrating-together" as const,
-    top: "55.1%",
-    left: "52.2%",
-    width: "16.4%",
-    height: "8.8%",
+    ...DESKTOP_BTN,
   },
   {
     label: "More of Us",
     href: INSTAGRAM_URL,
     id: "more-of-us" as const,
-    top: "67.2%",
-    left: "31.3%",
-    width: "37.3%",
-    height: "5.8%",
+    top: "49.0%",
+    left: "52.2%",
+    ...DESKTOP_BTN,
+  },
+  {
+    label: "Celebrating Together",
+    href: "#celebrating-together",
+    id: "celebrating-together" as const,
+    top: "57.8%",
+    left: "34.5%",
+    width: "31%",
+    height: "5.6%",
   },
 ] as const;
 
