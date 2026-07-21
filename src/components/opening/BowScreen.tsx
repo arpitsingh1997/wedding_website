@@ -49,6 +49,7 @@ export function BowScreen({ isUnwrapping, onUnwrap, onUnwrapped }: BowScreenProp
     if (!isUnwrapping || finished.current) return;
     const id = window.setTimeout(() => {
       finished.current = true;
+      // Chime self-ends after its airy reverb — don't cut it with the bow
       onUnwrapped();
     }, TOTAL_MS);
     return () => window.clearTimeout(id);

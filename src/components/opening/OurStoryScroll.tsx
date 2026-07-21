@@ -5,9 +5,12 @@ import { createPortal } from "react-dom";
 import { kickOurStoryAudio, stopOurStoryAudio } from "./our-story-audio";
 import { OurStoryDesktop } from "./our-story/OurStoryDesktop";
 import { OurStoryPanelScroll } from "./our-story/OurStoryPanelScroll";
+import { useInviteOverlayFade } from "./use-invite-overlay-fade";
 
 type OurStoryScrollProps = {
   open: boolean;
+  /** Fade-in when true (invitation page-turn) */
+  revealed?: boolean;
   onClose: () => void;
 };
 
@@ -16,8 +19,13 @@ type OurStoryScrollProps = {
  * Phone: five PNG panels (1→5) seamless vertical scroll.
  * Mac: single desktop.png seamless scroll.
  */
-export function OurStoryScroll({ open, onClose }: OurStoryScrollProps) {
+export function OurStoryScroll({
+  open,
+  revealed = true,
+  onClose,
+}: OurStoryScrollProps) {
   const [mounted, setMounted] = useState(false);
+  const { rendered, fadeStyle } = useInviteOverlayFade(open, revealed);
 
   useEffect(() => {
     setMounted(true);
@@ -31,7 +39,6 @@ export function OurStoryScroll({ open, onClose }: OurStoryScrollProps) {
     document.documentElement.classList.add("is-scroll-locked");
     const panel = document.getElementById("our-story");
     panel?.scrollTo(0, 0);
-    // Retry play after mount (tap already kicked; this covers desktop)
     kickOurStoryAudio();
     return () => {
       stopOurStoryAudio();
@@ -39,7 +46,7 @@ export function OurStoryScroll({ open, onClose }: OurStoryScrollProps) {
     };
   }, [open]);
 
-  if (!mounted || !open) return null;
+  if (!mounted || !rendered) return null;
 
   return createPortal(
     <div
@@ -47,6 +54,7 @@ export function OurStoryScroll({ open, onClose }: OurStoryScrollProps) {
       style={{
         WebkitOverflowScrolling: "touch",
         userSelect: "none",
+        ...fadeStyle,
       }}
       role="dialog"
       aria-modal="true"

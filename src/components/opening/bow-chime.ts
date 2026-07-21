@@ -1,4 +1,5 @@
 /**
+<<<<<<< HEAD
  * Luxury jewelry-box unveil — v2 (intentionally different from wind-chime).
  *
  * Soft latch click → wood/velvet lid → one short glass ping.
@@ -14,6 +15,20 @@ const MASTER_VOLUME = 0.052;
 /** Short glass ping — E6 (brighter / shorter than the old G5–A5 tubes) */
 const GLASS_FREQ = 1318.5;
 const SEQUENCE_END_SEC = 1.25;
+=======
+ * Bow unveil soundscape (Web Audio):
+ * 0.00s  soft satin ribbon loosening (very quiet)
+ * 0.25s  delicate paper unfold
+ * 0.60s  single crystal ting — G5
+ * 0.65s  long airy reverb (~1s)
+ * 1.10s  no new events (reverb tails into silence)
+ */
+
+const MASTER_VOLUME = 0.055;
+/** Crystal ting pitch — G5 (A5 = 880 as alternate) */
+const CRYSTAL_FREQ = 783.99;
+const SEQUENCE_END_SEC = 1.85;
+>>>>>>> a8bdb86 (Add 5-menu scroll, Celebrating Together, and related invite updates)
 
 let sharedCtx: AudioContext | null = null;
 let masterGain: GainNode | null = null;
@@ -36,11 +51,26 @@ function clearStopTimer() {
   stopTimer = null;
 }
 
+<<<<<<< HEAD
+=======
+/** One-shot filtered noise burst */
+>>>>>>> a8bdb86 (Add 5-menu scroll, Celebrating Together, and related invite updates)
 function noiseBurst(
   ctx: AudioContext,
   dest: AudioNode,
   t0: number,
+<<<<<<< HEAD
   opts: {
+=======
+  {
+    duration,
+    gain,
+    filterType,
+    frequency,
+    Q,
+    attack = 0.012,
+  }: {
+>>>>>>> a8bdb86 (Add 5-menu scroll, Celebrating Together, and related invite updates)
     duration: number;
     gain: number;
     filterType: BiquadFilterType;
@@ -49,12 +79,20 @@ function noiseBurst(
     attack?: number;
   }
 ) {
+<<<<<<< HEAD
   const { duration, gain, filterType, frequency, Q, attack = 0.008 } = opts;
+=======
+>>>>>>> a8bdb86 (Add 5-menu scroll, Celebrating Together, and related invite updates)
   const frames = Math.max(1, Math.ceil(ctx.sampleRate * duration));
   const buf = ctx.createBuffer(1, frames, ctx.sampleRate);
   const data = buf.getChannelData(0);
   for (let i = 0; i < frames; i++) {
+<<<<<<< HEAD
     data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (frames * 0.38));
+=======
+    const env = Math.exp(-i / (frames * 0.42));
+    data[i] = (Math.random() * 2 - 1) * env;
+>>>>>>> a8bdb86 (Add 5-menu scroll, Celebrating Together, and related invite updates)
   }
 
   const src = ctx.createBufferSource();
@@ -72,6 +110,7 @@ function noiseBurst(
   filter.connect(amp);
   amp.connect(dest);
   src.start(t0);
+<<<<<<< HEAD
   src.stop(t0 + duration + 0.02);
 }
 
@@ -141,10 +180,53 @@ function playVelvetLid(ctx: AudioContext, dest: AudioNode, t0: number) {
     frequency: 780,
     Q: 0.9,
     attack: 0.04,
+=======
+  src.stop(t0 + duration + 0.03);
+}
+
+/** Soft satin ribbon loosening — quiet low whoosh + silk texture */
+function playSatinRibbon(ctx: AudioContext, dest: AudioNode, t0: number) {
+  noiseBurst(ctx, dest, t0, {
+    duration: 0.38,
+    gain: 0.09,
+    filterType: "lowpass",
+    frequency: 420,
+    Q: 0.55,
+    attack: 0.06,
+  });
+  noiseBurst(ctx, dest, t0 + 0.04, {
+    duration: 0.28,
+    gain: 0.045,
+    filterType: "bandpass",
+    frequency: 900,
+    Q: 0.8,
+    attack: 0.05,
+  });
+}
+
+/** Delicate paper unfold — light high rustle */
+function playPaperUnfold(ctx: AudioContext, dest: AudioNode, t0: number) {
+  noiseBurst(ctx, dest, t0, {
+    duration: 0.22,
+    gain: 0.11,
+    filterType: "bandpass",
+    frequency: 2800,
+    Q: 1.1,
+    attack: 0.008,
+  });
+  noiseBurst(ctx, dest, t0 + 0.05, {
+    duration: 0.18,
+    gain: 0.06,
+    filterType: "highpass",
+    frequency: 4200,
+    Q: 0.7,
+    attack: 0.01,
+>>>>>>> a8bdb86 (Add 5-menu scroll, Celebrating Together, and related invite updates)
   });
 }
 
 /**
+<<<<<<< HEAD
  * One glass ping via light FM — reads as crystal in a box, not wind-chime tubes.
  */
 function playGlassPing(ctx: AudioContext, dest: AudioNode, t0: number) {
@@ -197,6 +279,76 @@ function playGlassPing(ctx: AudioContext, dest: AudioNode, t0: number) {
 }
 
 /** Begin on the bow tap (iOS gesture). */
+=======
+ * Generated impulse — bright early reflections + long airy tail (~1s).
+ */
+function createAiryImpulse(ctx: AudioContext, seconds = 1.05): AudioBuffer {
+  const rate = ctx.sampleRate;
+  const len = Math.ceil(rate * seconds);
+  const buf = ctx.createBuffer(2, len, rate);
+  for (let ch = 0; ch < 2; ch++) {
+    const data = buf.getChannelData(ch);
+    for (let i = 0; i < len; i++) {
+      const t = i / rate;
+      // Fast decay envelope for airy hall, not a slap echo
+      const env = Math.exp(-t * 3.2) * (1 - t / seconds);
+      const early = t < 0.045 ? Math.exp(-t * 55) * 0.55 : 0;
+      data[i] =
+        (Math.random() * 2 - 1) * env * 0.55 +
+        (Math.random() * 2 - 1) * early * 0.35;
+      // Slight stereo decorrelation
+      if (ch === 1) data[i] *= 0.92 + Math.sin(i * 0.002) * 0.04;
+    }
+  }
+  return buf;
+}
+
+/** Single crystal ting (G5) into long airy reverb */
+function playCrystalTing(
+  ctx: AudioContext,
+  dryDest: AudioNode,
+  wetDest: AudioNode,
+  t0: number
+) {
+  const freq = CRYSTAL_FREQ;
+
+  // Contact whisper
+  noiseBurst(ctx, dryDest, t0, {
+    duration: 0.03,
+    gain: 0.08,
+    filterType: "bandpass",
+    frequency: freq * 1.4,
+    Q: 1.2,
+    attack: 0.003,
+  });
+
+  const partials: { ratio: number; gain: number; decay: number }[] = [
+    { ratio: 1, gain: 0.85, decay: 1.15 },
+    { ratio: 2.002, gain: 0.18, decay: 0.75 },
+    { ratio: 2.76, gain: 0.07, decay: 0.55 },
+    { ratio: 5.4, gain: 0.035, decay: 0.4 },
+  ];
+
+  for (const p of partials) {
+    const osc = ctx.createOscillator();
+    const amp = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(freq * p.ratio, t0);
+    amp.gain.setValueAtTime(0.0001, t0);
+    amp.gain.exponentialRampToValueAtTime(p.gain, t0 + 0.012);
+    amp.gain.exponentialRampToValueAtTime(0.0001, t0 + p.decay);
+    osc.connect(amp);
+    amp.connect(dryDest);
+    amp.connect(wetDest);
+    osc.start(t0);
+    osc.stop(t0 + p.decay + 0.08);
+  }
+}
+
+/**
+ * Begin the unveil soundscape. Call from the bow tap (iOS gesture).
+ */
+>>>>>>> a8bdb86 (Add 5-menu scroll, Celebrating Together, and related invite updates)
 export function startBowChime() {
   if (typeof window === "undefined") return;
   stopBowChime(true);
@@ -214,6 +366,7 @@ export function startBowChime() {
   masterGain.gain.setValueAtTime(MASTER_VOLUME, now);
   masterGain.connect(ctx.destination);
 
+<<<<<<< HEAD
   // Dry only — no long hall reverb (that made it sound like wind chimes)
   playLatch(ctx, masterGain, now + 0.0);
   playWoodBody(ctx, masterGain, now + 0.02);
@@ -224,12 +377,48 @@ export function startBowChime() {
     document.documentElement.dataset.bowChime = BOW_CHIME_VERSION;
   }
 
+=======
+  // Dry path
+  const dry = ctx.createGain();
+  dry.gain.value = 1;
+  dry.connect(masterGain);
+
+  // Wet / airy reverb path (fed mainly by the crystal)
+  const convolver = ctx.createConvolver();
+  convolver.buffer = createAiryImpulse(ctx, 1.05);
+  const wet = ctx.createGain();
+  wet.gain.value = 0.0001;
+  // Reverb blooms just after the ting
+  wet.gain.setValueAtTime(0.0001, now + 0.6);
+  wet.gain.exponentialRampToValueAtTime(0.95, now + 0.65);
+  wet.gain.exponentialRampToValueAtTime(0.55, now + 1.05);
+  wet.gain.exponentialRampToValueAtTime(0.0001, now + 1.7);
+
+  const wetInput = ctx.createGain();
+  wetInput.gain.value = 1;
+  wetInput.connect(convolver);
+  convolver.connect(wet);
+  wet.connect(masterGain);
+
+  // Timeline
+  playSatinRibbon(ctx, dry, now + 0.0);
+  playPaperUnfold(ctx, dry, now + 0.25);
+  playCrystalTing(ctx, dry, wetInput, now + 0.6);
+
+  // Self-end into silence (don't cut the reverb when the bow finishes ~1.1s)
+>>>>>>> a8bdb86 (Add 5-menu scroll, Celebrating Together, and related invite updates)
   stopTimer = window.setTimeout(() => {
     stopTimer = null;
     stopBowChime(false);
   }, SEQUENCE_END_SEC * 1000);
 }
 
+<<<<<<< HEAD
+=======
+/**
+ * Soft teardown. Pass `force` to cut immediately (new start / unmount).
+ */
+>>>>>>> a8bdb86 (Add 5-menu scroll, Celebrating Together, and related invite updates)
 export function stopBowChime(force = false) {
   clearStopTimer();
   if (!playing && !sharedCtx) return;
@@ -243,7 +432,11 @@ export function stopBowChime(force = false) {
   if (!ctx || !master) return;
 
   const now = ctx.currentTime;
+<<<<<<< HEAD
   const fade = force ? 0.05 : 0.22;
+=======
+  const fade = force ? 0.08 : 0.35;
+>>>>>>> a8bdb86 (Add 5-menu scroll, Celebrating Together, and related invite updates)
   try {
     master.gain.cancelScheduledValues(now);
     master.gain.setValueAtTime(Math.max(master.gain.value, 0.0001), now);
@@ -255,5 +448,9 @@ export function stopBowChime(force = false) {
   stopTimer = window.setTimeout(() => {
     stopTimer = null;
     void ctx.close().catch(() => {});
+<<<<<<< HEAD
   }, fade * 1000 + 50);
+=======
+  }, fade * 1000 + 80);
+>>>>>>> a8bdb86 (Add 5-menu scroll, Celebrating Together, and related invite updates)
 }

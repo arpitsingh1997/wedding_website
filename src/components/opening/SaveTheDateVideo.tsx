@@ -2,20 +2,27 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useInviteOverlayFade } from "./use-invite-overlay-fade";
 import { SAVE_THE_DATE_VIDEO } from "./welcome-assets";
 
 type SaveTheDateVideoProps = {
   open: boolean;
+  revealed?: boolean;
   onClose: () => void;
 };
 
 const CONTROLS_HIDE_MS = 500;
 
-export function SaveTheDateVideo({ open, onClose }: SaveTheDateVideoProps) {
+export function SaveTheDateVideo({
+  open,
+  revealed = true,
+  onClose,
+}: SaveTheDateVideoProps) {
   const [mounted, setMounted] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
   const hideTimer = useRef<number | null>(null);
+  const { rendered, fadeStyle } = useInviteOverlayFade(open, revealed);
 
   useEffect(() => {
     setMounted(true);
@@ -75,11 +82,12 @@ export function SaveTheDateVideo({ open, onClose }: SaveTheDateVideoProps) {
     scheduleHideControls();
   }, [scheduleHideControls]);
 
-  if (!mounted || !open) return null;
+  if (!mounted || !rendered) return null;
 
   return createPortal(
     <div
       className="full-viewport z-[100020] flex items-center justify-center bg-black/90 p-4 sm:p-8"
+      style={fadeStyle}
       role="dialog"
       aria-modal="true"
       aria-label="Save the date video"

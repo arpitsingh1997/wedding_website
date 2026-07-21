@@ -2,12 +2,26 @@
 
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import { useIsDesktop } from "@/lib/use-is-desktop";
-import { kickOurStoryAudio, stopOurStoryAudio } from "./our-story-audio";
+import { flushSync } from "react-dom";
+import { kickOurStoryAudio, preloadOurStoryAudio, stopOurStoryAudio } from "./our-story-audio";
+import { CelebratingTogether } from "./CelebratingTogether";
+import {
+  PAGE_FADE_IN_MS,
+  PAGE_FADE_OUT_MS,
+  waitMs,
+} from "./invite-nav-motion";
+import {
+  armMutedLoopVideo,
+  kickCelebratingBellsPlayback,
+  playMutedLoopVideo,
+} from "./invite-video";
 import { OurStoryScroll } from "./OurStoryScroll";
 import { PAGE_CREAM } from "./page-cream";
-import { PostRevealNav } from "./PostRevealNav";
+import { PostRevealNav, type InviteNavDestination } from "./PostRevealNav";
 import { SaveTheDateVideo } from "./SaveTheDateVideo";
 import {
+  CELEBRATING_TOGETHER,
+  CELEBRATING_TOGETHER_BELLS,
   LANDING2_DESKTOP,
   LANDING2_PHONE,
   LANDING2A_DESKTOP_VIDEO,
@@ -32,23 +46,9 @@ function useLoopingInviteVideo(
     const el = ref.current;
     if (!el || !enabled) return;
 
-    const arm = () => {
-      el.muted = true;
-      el.defaultMuted = true;
-      el.playsInline = true;
-      el.loop = true;
-      el.setAttribute("muted", "");
-      el.setAttribute("playsinline", "");
-      el.setAttribute("webkit-playsinline", "");
-      el.controls = false;
-    };
+    const play = () => playMutedLoopVideo(el);
 
-    const play = () => {
-      arm();
-      if (el.paused) void el.play().catch(() => {});
-    };
-
-    arm();
+    armMutedLoopVideo(el);
     play();
 
     const onVisibility = () => {
@@ -84,8 +84,15 @@ export function ThirdPage({
   const [revealed, setRevealed] = useState(false);
   const [saveTheDateOpen, setSaveTheDateOpen] = useState(false);
   const [ourStoryOpen, setOurStoryOpen] = useState(false);
+  const [celebratingTogetherOpen, setCelebratingTogetherOpen] = useState(false);
+  /** Soft fade-in for overlays (invitation page-turn) */
+  const [overlayRevealed, setOverlayRevealed] = useState(false);
+  /** Fade the invite/scroll surface out while opening a destination */
+  const [homeFadedOut, setHomeFadedOut] = useState(false);
+  const [navigationLocked, setNavigationLocked] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const isDesktop = useIsDesktop();
+  const navBusy = useRef(false);
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => setRevealed(true));
@@ -97,6 +104,16 @@ export function ThirdPage({
   useEffect(() => {
     const img = new Image();
     img.src = isDesktop ? LANDING3_DESKTOP : LANDING3_SCROLL;
+    const celebrating = new Image();
+    celebrating.src = CELEBRATING_TOGETHER;
+    // Warm the bells decode so the multiply layer doesn’t flash soft/white
+    const bells = document.createElement("video");
+    bells.muted = true;
+    bells.preload = "auto";
+    bells.playsInline = true;
+    bells.src = CELEBRATING_TOGETHER_BELLS;
+    // Warm Our Story clip so tap → sound is immediate
+    preloadOurStoryAudio();
   }, [isDesktop]);
 
   const goToCountdown = useCallback(() => {
@@ -139,43 +156,114 @@ export function ThirdPage({
     void el.play().catch(() => {});
   }, [inviteActive, isDesktop]);
 
-  const openOurStory = useCallback(() => {
-    setSaveTheDateOpen(false);
-    // Same tap unlocks unmuted audio on iPhone
-    kickOurStoryAudio();
-    setOurStoryOpen(true);
-  }, []);
-
-  const closeOurStory = useCallback(() => {
+  const closeAllOverlays = useCallback(() => {
     stopOurStoryAudio();
     setOurStoryOpen(false);
+    setSaveTheDateOpen(false);
+    setCelebratingTogetherOpen(false);
+    setOverlayRevealed(false);
   }, []);
 
-  const openSaveTheDate = useCallback(() => {
-    setOurStoryOpen(false);
-    setSaveTheDateOpen(true);
+  /** Gesture-safe: start media / mount overlay invisible on press */
+  const onNavPressStart = useCallback(
+    (id: InviteNavDestination) => {
+      if (navBusy.current || navigationLocked) return;
+
+      if (id === "our-story") {
+        kickOurStoryAudio();
+        flushSync(() => {
+          setSaveTheDateOpen(false);
+          setCelebratingTogetherOpen(false);
+          setOverlayRevealed(false);
+          setOurStoryOpen(true);
+        });
+        return;
+      }
+
+      if (id === "save-the-date") {
+        flushSync(() => {
+          setOurStoryOpen(false);
+          setCelebratingTogetherOpen(false);
+          setOverlayRevealed(false);
+          setSaveTheDateOpen(true);
+        });
+        return;
+      }
+
+      if (id === "celebrating-together") {
+        flushSync(() => {
+          setOurStoryOpen(false);
+          setSaveTheDateOpen(false);
+          setOverlayRevealed(false);
+          setCelebratingTogetherOpen(true);
+        });
+        kickCelebratingBellsPlayback();
+      }
+    },
+    [navigationLocked]
+  );
+
+  /** Finger/mouse cancelled before navigate — undo invisible mount */
+  const onNavPressCancel = useCallback(() => {
+    if (navBusy.current || homeFadedOut) return;
+    closeAllOverlays();
+  }, [closeAllOverlays, homeFadedOut]);
+
+  /** After press hold — fade home out, fade destination in */
+  const onNavNavigate = useCallback(async (id: InviteNavDestination) => {
+    if (id === "more-of-us") return;
+    if (navBusy.current) return;
+    navBusy.current = true;
+    setNavigationLocked(true);
+    setHomeFadedOut(true);
+
+    // Slight overlap: destination begins fading in as home fades out
+    await waitMs(Math.round(PAGE_FADE_OUT_MS * 0.35));
+    setOverlayRevealed(true);
+    await waitMs(PAGE_FADE_IN_MS);
+
+    // Stay locked while an overlay is open (prevents double-open)
+    navBusy.current = false;
   }, []);
+
+  const restoreHomeAfterClose = useCallback(async () => {
+    // Fade destination out first, then unmount and restore the invite page
+    setOverlayRevealed(false);
+    await waitMs(PAGE_FADE_IN_MS);
+    closeAllOverlays();
+    setHomeFadedOut(false);
+    setNavigationLocked(false);
+    navBusy.current = false;
+  }, [closeAllOverlays]);
+
+  const closeOurStory = useCallback(() => {
+    void restoreHomeAfterClose();
+  }, [restoreHomeAfterClose]);
 
   const closeSaveTheDate = useCallback(() => {
-    setSaveTheDateOpen(false);
-  }, []);
+    void restoreHomeAfterClose();
+  }, [restoreHomeAfterClose]);
+
+  const closeCelebratingTogether = useCallback(() => {
+    void restoreHomeAfterClose();
+  }, [restoreHomeAfterClose]);
 
   useEffect(() => {
-    if (!ourStoryOpen && !saveTheDateOpen) return;
+    if (!ourStoryOpen && !saveTheDateOpen && !celebratingTogetherOpen) return;
     document.documentElement.classList.add("is-scroll-locked");
     return () => {
       document.documentElement.classList.remove("is-scroll-locked");
     };
-  }, [ourStoryOpen, saveTheDateOpen]);
+  }, [ourStoryOpen, saveTheDateOpen, celebratingTogetherOpen]);
 
   return (
     <>
       <div
         id="home"
-        className="invite-scroller"
+        className={`invite-scroller invite-page-fade ${homeFadedOut ? "is-faded-out" : ""}`}
         style={{
           backgroundColor: PAGE_CREAM,
-          pointerEvents: interactive ? "auto" : "none",
+          pointerEvents: interactive && !homeFadedOut ? "auto" : "none",
         }}
         data-page="landing2-invitation"
       >
@@ -232,13 +320,28 @@ export function ThirdPage({
 
         <PostRevealNav
           reveal={revealed}
-          onOurStoryClick={openOurStory}
-          onSaveTheDateClick={openSaveTheDate}
+          navigationLocked={navigationLocked}
+          onPressStart={onNavPressStart}
+          onPressCancel={onNavPressCancel}
+          onNavigate={onNavNavigate}
         />
       </div>
 
-      <OurStoryScroll open={ourStoryOpen} onClose={closeOurStory} />
-      <SaveTheDateVideo open={saveTheDateOpen} onClose={closeSaveTheDate} />
+      <OurStoryScroll
+        open={ourStoryOpen}
+        revealed={overlayRevealed}
+        onClose={closeOurStory}
+      />
+      <SaveTheDateVideo
+        open={saveTheDateOpen}
+        revealed={overlayRevealed}
+        onClose={closeSaveTheDate}
+      />
+      <CelebratingTogether
+        open={celebratingTogetherOpen}
+        revealed={overlayRevealed}
+        onClose={closeCelebratingTogether}
+      />
     </>
   );
 }

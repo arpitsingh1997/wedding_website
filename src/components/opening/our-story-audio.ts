@@ -1,11 +1,8 @@
-/** Soft background clip for Our Story — 2:21.5 → 3:15 */
-export const OUR_STORY_AUDIO_START_SEC = 2 * 60 + 21.5;
-export const OUR_STORY_AUDIO_END_SEC = 3 * 60 + 15;
-/** Quiet enough to sit under the story without competing */
+/** Soft background clip for Our Story — pre-trimmed 2:21.5 → 3:15 (plays from t=0) */
 export const OUR_STORY_AUDIO_VOLUME = 0.06;
 
-/** From Desktop “our story/You are in love.mp4” (audio extracted) */
-export const OUR_STORY_AUDIO = "/media/youre-in-love.m4a";
+/** Trimmed from Desktop “our story/You are in love.mp4” — no seek delay on tap */
+export const OUR_STORY_AUDIO = "/media/youre-in-love-clip.m4a";
 
 let sharedAudio: HTMLAudioElement | null = null;
 let endListenerAttached = false;
@@ -14,18 +11,24 @@ let lifecycleAttached = false;
 let storySessionActive = false;
 /** Paused because the screen/tab hid — resume when visible again */
 let pausedForBackground = false;
-let resumeAtSec = OUR_STORY_AUDIO_START_SEC;
+let resumeAtSec = 0;
 
 function loopClipToStart() {
   if (!sharedAudio || !storySessionActive) return;
-  sharedAudio.currentTime = OUR_STORY_AUDIO_START_SEC;
+  sharedAudio.currentTime = 0;
   void sharedAudio.play().catch(() => {});
+}
+
+function onEnded() {
+  if (!storySessionActive) return;
+  loopClipToStart();
 }
 
 function onTimeUpdate() {
   if (!sharedAudio || !storySessionActive) return;
-  // Keep looping the soft clip while Our Story stays open
-  if (sharedAudio.currentTime >= OUR_STORY_AUDIO_END_SEC) {
+  // Near end — loop (covers browsers that don't fire `ended` reliably)
+  const duration = sharedAudio.duration;
+  if (Number.isFinite(duration) && duration > 0 && sharedAudio.currentTime >= duration - 0.08) {
     loopClipToStart();
   }
 }
@@ -34,9 +37,6 @@ function pauseForBackground() {
   if (!storySessionActive || !sharedAudio) return;
   if (sharedAudio.paused && !pausedForBackground) return;
   resumeAtSec = sharedAudio.currentTime;
-  if (resumeAtSec >= OUR_STORY_AUDIO_END_SEC) {
-    resumeAtSec = OUR_STORY_AUDIO_START_SEC;
-  }
   sharedAudio.pause();
   pausedForBackground = true;
 }
@@ -48,12 +48,8 @@ function resumeFromBackground() {
   }
   pausedForBackground = false;
   const audio = getOurStoryAudio();
-  const t = Math.min(
-    Math.max(resumeAtSec, OUR_STORY_AUDIO_START_SEC),
-    OUR_STORY_AUDIO_END_SEC - 0.05
-  );
   audio.volume = OUR_STORY_AUDIO_VOLUME;
-  audio.currentTime = t;
+  audio.currentTime = Math.max(0, resumeAtSec);
   void audio.play().catch(() => {});
 }
 
@@ -86,10 +82,24 @@ function getOurStoryAudio(): HTMLAudioElement {
   }
   if (!endListenerAttached) {
     sharedAudio.addEventListener("timeupdate", onTimeUpdate);
+    sharedAudio.addEventListener("ended", onEnded);
     endListenerAttached = true;
   }
   attachLifecycleListeners();
   return sharedAudio;
+}
+
+/** Warm decode so the first Our Story tap plays instantly */
+export function preloadOurStoryAudio() {
+  if (typeof window === "undefined") return;
+  const audio = getOurStoryAudio();
+  audio.preload = "auto";
+  // Kick network + decode without audible playback
+  try {
+    audio.load();
+  } catch {
+    /* ignore */
+  }
 }
 
 /** Call from the Our Story tap so iOS allows unmuted playback */
@@ -97,10 +107,13 @@ export function kickOurStoryAudio() {
   if (typeof window === "undefined") return;
   storySessionActive = true;
   pausedForBackground = false;
-  resumeAtSec = OUR_STORY_AUDIO_START_SEC;
+  resumeAtSec = 0;
   const audio = getOurStoryAudio();
   audio.volume = OUR_STORY_AUDIO_VOLUME;
-  audio.currentTime = OUR_STORY_AUDIO_START_SEC;
+  // Clip already starts at the soft section — no seek wait
+  if (audio.currentTime > 0.05) {
+    audio.currentTime = 0;
+  }
   void audio.play().catch(() => {});
 }
 
@@ -108,8 +121,8 @@ export function kickOurStoryAudio() {
 export function stopOurStoryAudio() {
   storySessionActive = false;
   pausedForBackground = false;
-  resumeAtSec = OUR_STORY_AUDIO_START_SEC;
+  resumeAtSec = 0;
   if (!sharedAudio) return;
   sharedAudio.pause();
-  sharedAudio.currentTime = OUR_STORY_AUDIO_START_SEC;
+  sharedAudio.currentTime = 0;
 }

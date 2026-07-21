@@ -198,4 +198,67 @@
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
   }
+
+  /* Celebrating Together — skip GPU layer that softens text-heavy art */
+  .cover-media.celebrating-cover {
+    transform: none;
+    backface-visibility: visible;
+    -webkit-backface-visibility: visible;
+  }
+}
+
+/*
+ * Scroll-page menu hits — invisible over printed buttons.
+ * Press only nudges the interior text; the printed border stays put.
+ */
+.invite-nav-hit {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  cursor: pointer;
+  overflow: visible;
+}
+
+.invite-nav-hit--inert {
+  cursor: default;
+}
+
+/* Clip to inside the printed frame so borders never move/break */
+.invite-nav-press-clip {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  clip-path: inset(16% 3.2% 16% 3.2%);
+  pointer-events: none;
+}
+
+.invite-nav-press-mask {
+  position: absolute;
+  inset: 16% 3.2%;
+  background-color: var(--page-cream, #f3e9e6);
+}
+
+.invite-nav-press-art {
+  position: absolute;
+  z-index: 1;
+  display: block;
+  max-width: none;
+  pointer-events: none;
+  /* Subtle text press only — no scale (scale broke the border) */
+  transform: translateY(1.25px);
+  transition: transform 90ms ease-out;
+}
+
+/* Soft fade when turning to the next invitation page */
+.invite-page-fade {
+  transition: opacity 220ms ease;
+  will-change: opacity;
+}
+
+.invite-page-fade.is-faded-out {
+  opacity: 0;
+  pointer-events: none;
 }

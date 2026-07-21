@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 
-/** Wedding day — January 26, 2027 (local midnight) */
-const WEDDING_DATE = new Date(2027, 0, 26);
+/** Wedding day — 26 January 2027, 00:00 India Standard Time (UTC+05:30) */
+const WEDDING_DATE = new Date("2027-01-26T00:00:00+05:30");
 
 type TimeLeft = {
   days: number;
