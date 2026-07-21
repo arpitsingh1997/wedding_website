@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { createPortal } from "react-dom";
-import { useIsDesktop } from "@/lib/use-is-desktop";
 import { armMutedLoopVideo, playMutedLoopVideo } from "./invite-video";
 import { PAGE_CREAM } from "./page-cream";
 import { useInviteOverlayFade } from "./use-invite-overlay-fade";
@@ -64,16 +63,13 @@ export function CelebratingTogether({
   const [mounted, setMounted] = useState(false);
   const [bellsReady, setBellsReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const isDesktop = useIsDesktop();
-  /** Portrait bells plate is authored for phone; use it as the mobile overlay. */
-  const showBellsOverlay = !isDesktop;
   const { rendered, fadeStyle } = useInviteOverlayFade(open, revealed);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  useLoopingBellsVideo(videoRef, open && showBellsOverlay);
+  useLoopingBellsVideo(videoRef, open);
 
   useEffect(() => {
     if (!open) {
@@ -85,7 +81,6 @@ export function CelebratingTogether({
     let raf2 = 0;
     const raf1 = requestAnimationFrame(() => {
       raf2 = requestAnimationFrame(() => {
-        if (!showBellsOverlay) return;
         const el = videoRef.current;
         if (!el) return;
         try {
@@ -103,7 +98,7 @@ export function CelebratingTogether({
       document.documentElement.classList.remove("is-scroll-locked");
       videoRef.current?.pause();
     };
-  }, [open, showBellsOverlay]);
+  }, [open]);
 
   if (!mounted || !rendered) return null;
 
@@ -138,6 +133,7 @@ export function CelebratingTogether({
       {/*
         object-cover: edge-to-edge fill (no cream side gutters).
         isolation: bells multiply against the PNG only (iOS).
+        Mobile: celebrating-together-bells@2x.mp4 as the animated overlay.
       */}
       <div
         className="pointer-events-none absolute inset-0 overflow-hidden"
@@ -153,35 +149,33 @@ export function CelebratingTogether({
           fetchPriority="high"
           draggable={false}
         />
-        {showBellsOverlay && (
-          <video
-            ref={videoRef}
-            key={open ? "celebrating-bells-open" : "celebrating-bells-closed"}
-            src={CELEBRATING_TOGETHER_BELLS}
-            className="invite-loop-video invite-bells-layer cover-media celebrating-cover"
-            style={{
-              opacity: bellsReady ? 1 : 0,
-              transition: "opacity 180ms ease-out",
-            }}
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="auto"
-            controls={false}
-            disablePictureInPicture
-            controlsList="nodownload nofullscreen noremoteplayback"
-            data-page="celebrating-together-bells"
-            onLoadedData={() => {
-              playMutedLoopVideo(videoRef.current);
-              setBellsReady(true);
-            }}
-            onCanPlay={() => {
-              playMutedLoopVideo(videoRef.current);
-              setBellsReady(true);
-            }}
-          />
-        )}
+        <video
+          ref={videoRef}
+          key={open ? "celebrating-bells-open" : "celebrating-bells-closed"}
+          src={CELEBRATING_TOGETHER_BELLS}
+          className="invite-loop-video invite-bells-layer cover-media celebrating-cover"
+          style={{
+            opacity: bellsReady ? 1 : 0,
+            transition: "opacity 180ms ease-out",
+          }}
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+          controls={false}
+          disablePictureInPicture
+          controlsList="nodownload nofullscreen noremoteplayback"
+          data-page="celebrating-together-bells"
+          onLoadedData={() => {
+            playMutedLoopVideo(videoRef.current);
+            setBellsReady(true);
+          }}
+          onCanPlay={() => {
+            playMutedLoopVideo(videoRef.current);
+            setBellsReady(true);
+          }}
+        />
       </div>
 
       <span className="sr-only">
