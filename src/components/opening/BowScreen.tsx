@@ -7,7 +7,6 @@ import { LANDING, LANDING_DESKTOP } from "./landing-assets";
 import { LandingArt } from "./LandingArt";
 import { kickInviteVideoPlayback } from "./invite-video";
 import { useIsDesktop } from "@/lib/use-is-desktop";
-import { DESKTOP_MIN_WIDTH } from "@/lib/viewport";
 
 type BowScreenProps = {
   isUnwrapping: boolean;
@@ -59,10 +58,8 @@ export function BowScreen({ isUnwrapping, onUnwrap, onUnwrapped }: BowScreenProp
     if (advanced.current || isUnwrapping) return;
     advanced.current = true;
     startBowChime();
-    // Same tap unlocks muted autoplay on iPhone
-    if (!window.matchMedia(`(min-width: ${DESKTOP_MIN_WIDTH}px)`).matches) {
-      kickInviteVideoPlayback();
-    }
+    // Same tap unlocks muted invite bells (phone + desktop)
+    kickInviteVideoPlayback();
     onUnwrap();
   }, [isUnwrapping, onUnwrap]);
 
