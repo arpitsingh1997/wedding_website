@@ -1,4 +1,4 @@
-export const BUILD = "desklanding3-more-of-us-20260721j";
+export const BUILD = "desktop-bow-invite-scroll-20260721k";
 
 /** Phone invite — base art (Desktop landing2@2x.png) */
 export const LANDING2_PHONE = `/images/landing2@2x.png?${BUILD}`;
@@ -9,7 +9,7 @@ export const LANDING2A_VIDEO = `/images/landing2a@2x.mp4?${BUILD}`;
 /** @deprecated alias */
 export const LANDING2_POSTER = LANDING2_PHONE;
 
-/** Invitation screen — desktop static art */
+/** Invitation screen — desktop static art (after bow) */
 export const LANDING2_DESKTOP = `/images/desklanding2@2x.png?${BUILD}`;
 
 /** Desktop invite — bells overlay (desklanding2a@2x.mp4), white plate + multiply */
