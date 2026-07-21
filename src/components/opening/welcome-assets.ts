@@ -1,4 +1,4 @@
-export const BUILD = "celebrating-bells-mobile-20260721i";
+export const BUILD = "desklanding3-more-of-us-20260721j";
 
 /** Phone invite — base art (Desktop landing2@2x.png) */
 export const LANDING2_PHONE = `/images/landing2@2x.png?${BUILD}`;
@@ -18,7 +18,7 @@ export const LANDING2A_DESKTOP_VIDEO = `/images/desklanding2a@2x.mp4?${BUILD}`;
 /** Scroll-down page — phone countdown + vertical nav artwork */
 export const LANDING3_SCROLL = `/images/landing3@2x.png?${BUILD}`;
 
-/** Scroll-down page — desktop countdown + 2×2 nav artwork */
+/** Scroll-down page — desktop countdown + nav (desklanding3@2x.png) */
 export const LANDING3_DESKTOP = `/images/desklanding3@2x.png?${BUILD}`;
 
 /** Celebrating Together — family list artwork */
