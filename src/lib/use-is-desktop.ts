@@ -1,13 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import { DESKTOP_MIN_WIDTH } from "@/lib/viewport";
 
-/** Client-only desktop check. Defaults false (mobile) so phone assets stay stable. */
+/**
+ * Client desktop check. Starts false for SSR/hydration match, then resolves
+ * in useLayoutEffect (before paint) so desktop never flashes phone art.
+ */
 export function useIsDesktop() {
   const [isDesktop, setIsDesktop] = useState(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const media = window.matchMedia(`(min-width: ${DESKTOP_MIN_WIDTH}px)`);
     const sync = () => setIsDesktop(media.matches);
     sync();

@@ -6,7 +6,7 @@ import { startBowChime, stopBowChime } from "./bow-chime";
 import { LANDING, LANDING_DESKTOP } from "./landing-assets";
 import { LandingArt } from "./LandingArt";
 import { kickInviteVideoPlayback } from "./invite-video";
-import { useIsDesktop } from "@/lib/use-is-desktop";
+import { DESKTOP_MIN_WIDTH } from "@/lib/viewport";
 
 type BowScreenProps = {
   isUnwrapping: boolean;
@@ -27,8 +27,6 @@ export function BowScreen({ isUnwrapping, onUnwrap, onUnwrapped }: BowScreenProp
   const [flapsOpening, setFlapsOpening] = useState(false);
   const advanced = useRef(false);
   const finished = useRef(false);
-  const isDesktop = useIsDesktop();
-  const bowSrc = isDesktop ? LANDING_DESKTOP : LANDING;
 
   useEffect(() => {
     setMounted(true);
@@ -74,6 +72,7 @@ export function BowScreen({ isUnwrapping, onUnwrap, onUnwrapped }: BowScreenProp
       }}
       data-bow-screen={isUnwrapping ? "unwrapping" : "closed"}
       data-bow-version="celesta-sunshine-v5"
+      data-desktop-flow="desklanding-1-2-3"
     >
       <div
         className={`bow-flap bow-flap-left absolute inset-y-0 left-0 z-20 h-full overflow-hidden ${flapsOpening ? "is-opening" : ""}`}
@@ -97,8 +96,14 @@ export function BowScreen({ isUnwrapping, onUnwrap, onUnwrapped }: BowScreenProp
 
       {!flapsOpening && (
         <div className="pointer-events-none absolute inset-0 z-40 overflow-hidden" aria-hidden>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={bowSrc} alt="" className="cover-media" draggable={false} />
+          <picture>
+            <source
+              media={`(min-width: ${DESKTOP_MIN_WIDTH}px)`}
+              srcSet={LANDING_DESKTOP}
+            />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={LANDING} alt="" className="cover-media" draggable={false} />
+          </picture>
         </div>
       )}
 

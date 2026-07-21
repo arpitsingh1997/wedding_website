@@ -248,22 +248,19 @@ export function PostRevealNav({
       data-page="landing3-scroll"
       data-layout={isDesktop ? "desktop" : "mobile"}
     >
-      <div
-        className={
-          isDesktop
-            ? "relative mx-auto w-full max-w-none"
-            : "relative mx-auto w-full max-w-none sm:max-w-[540px] lg:max-w-[480px]"
-        }
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={artSrc}
-          alt="Countdown to our forever — Dharmi and Arpit"
-          className="crisp-image block h-auto w-full max-w-none select-none"
-          decoding="async"
-          fetchPriority="high"
-          draggable={false}
-        />
+      <div className="relative mx-auto w-full max-w-[540px] lg:max-w-none">
+        <picture>
+          <source media="(min-width: 1024px)" srcSet={LANDING3_DESKTOP} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={LANDING3_SCROLL}
+            alt="Countdown to our forever — Dharmi and Arpit"
+            className="crisp-image block h-auto w-full max-w-none select-none"
+            decoding="async"
+            fetchPriority="high"
+            draggable={false}
+          />
+        </picture>
 
         <div
           className="pointer-events-none absolute inset-x-0 z-[1] flex justify-center px-5"

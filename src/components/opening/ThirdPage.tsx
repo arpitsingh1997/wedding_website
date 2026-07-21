@@ -102,9 +102,26 @@ export function ThirdPage({
 
   useLoopingInviteVideo(videoRef, true);
 
+  // Keep invite bells on the correct phone/desktop file after layout resolves
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el) return;
+    const next = isDesktop ? LANDING2A_DESKTOP_VIDEO : LANDING2A_VIDEO;
+    const marker = isDesktop ? "desklanding2a" : "landing2a@2x";
+    if (el.src.includes(marker)) return;
+    el.src = next;
+    el.load();
+    playMutedLoopVideo(el);
+  }, [isDesktop]);
+
   useEffect(() => {
     const img = new Image();
     img.src = isDesktop ? LANDING3_DESKTOP : LANDING3_SCROLL;
+    // Prefetch both invite frames so desktop never waits on bow open
+    const invitePhone = new Image();
+    invitePhone.src = LANDING2_PHONE;
+    const inviteDesk = new Image();
+    inviteDesk.src = LANDING2_DESKTOP;
     const celebrating = new Image();
     celebrating.src = CELEBRATING_TOGETHER;
     // Warm the bells decode so the multiply layer doesn’t flash soft/white
@@ -283,17 +300,20 @@ export function ThirdPage({
             style={{ backgroundColor: PAGE_CREAM }}
             aria-hidden
           >
-            {/* Base invite art */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={isDesktop ? LANDING2_DESKTOP : LANDING2_PHONE}
-              alt=""
-              className="cover-media"
-              decoding="async"
-              fetchPriority="high"
-              draggable={false}
-            />
-            {/* Bells on white — multiply drops the white plate */}
+            {/* Base invite art — phone vs desktop via <picture> (no JS flash) */}
+            <picture>
+              <source media="(min-width: 1024px)" srcSet={LANDING2_DESKTOP} />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={LANDING2_PHONE}
+                alt=""
+                className="cover-media"
+                decoding="async"
+                fetchPriority="high"
+                draggable={false}
+              />
+            </picture>
+            {/* Bells on white — multiply drops the white plate. Both sources; CSS picks one. */}
             <video
               ref={videoRef}
               src={isDesktop ? LANDING2A_DESKTOP_VIDEO : LANDING2A_VIDEO}
