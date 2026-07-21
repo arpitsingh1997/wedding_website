@@ -8,17 +8,17 @@ import { PAGE_FADE_IN_MS } from "./invite-nav-motion";
  * `open` mounts/unmounts; `revealed` drives the fade-in when provided.
  */
 export function useInviteOverlayFade(open: boolean, revealed = true) {
-  const [rendered, setRendered] = useState(open);
+  const [keepMounted, setKeepMounted] = useState(open);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     if (!open) {
       setVisible(false);
-      const t = window.setTimeout(() => setRendered(false), PAGE_FADE_IN_MS);
+      const t = window.setTimeout(() => setKeepMounted(false), PAGE_FADE_IN_MS);
       return () => window.clearTimeout(t);
     }
 
-    setRendered(true);
+    setKeepMounted(true);
     if (!revealed) {
       setVisible(false);
       return;
@@ -33,6 +33,10 @@ export function useInviteOverlayFade(open: boolean, revealed = true) {
       cancelAnimationFrame(raf2);
     };
   }, [open, revealed]);
+
+  // `open` must mount immediately (same frame as the nav gesture) so iPhone
+  // can start muted video playback inside the user-gesture window.
+  const rendered = open || keepMounted;
 
   return {
     rendered,

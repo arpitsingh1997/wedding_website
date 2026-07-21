@@ -28,6 +28,7 @@ function useLoopingBellsVideo(
     const play = () => playMutedLoopVideo(el);
 
     armMutedLoopVideo(el);
+    el.load();
     play();
 
     const onVisibility = () => {
@@ -53,7 +54,7 @@ function useLoopingBellsVideo(
   }, [ref, enabled]);
 }
 
-/** Full-viewport Celebrating Together — base PNG + bells, invitation fade */
+/** Full-viewport Celebrating Together — base PNG + mobile bells overlay */
 export function CelebratingTogether({
   open,
   revealed = true,
@@ -82,7 +83,11 @@ export function CelebratingTogether({
       raf2 = requestAnimationFrame(() => {
         const el = videoRef.current;
         if (!el) return;
-        el.currentTime = 0;
+        try {
+          el.currentTime = 0;
+        } catch {
+          // ignore seek before metadata
+        }
         playMutedLoopVideo(el);
       });
     });
@@ -128,6 +133,7 @@ export function CelebratingTogether({
       {/*
         object-cover: edge-to-edge fill (no cream side gutters).
         isolation: bells multiply against the PNG only (iOS).
+        Mobile: celebrating-together-bells@2x.mp4 as the animated overlay.
       */}
       <div
         className="pointer-events-none absolute inset-0 overflow-hidden"
@@ -145,6 +151,7 @@ export function CelebratingTogether({
         />
         <video
           ref={videoRef}
+          key={open ? "celebrating-bells-open" : "celebrating-bells-closed"}
           src={CELEBRATING_TOGETHER_BELLS}
           className="invite-loop-video invite-bells-layer cover-media celebrating-cover"
           style={{
@@ -164,7 +171,10 @@ export function CelebratingTogether({
             playMutedLoopVideo(videoRef.current);
             setBellsReady(true);
           }}
-          onCanPlay={() => setBellsReady(true)}
+          onCanPlay={() => {
+            playMutedLoopVideo(videoRef.current);
+            setBellsReady(true);
+          }}
         />
       </div>
 
