@@ -1,4 +1,4 @@
-export const BUILD = "desklanding2-landing-20260721h";
+export const BUILD = "celebrating-bells-mobile-20260721i";
 
 /** Phone invite — base art (Desktop landing2@2x.png) */
 export const LANDING2_PHONE = `/images/landing2@2x.png?${BUILD}`;
@@ -24,7 +24,7 @@ export const LANDING3_DESKTOP = `/images/desklanding3@2x.png?${BUILD}`;
 /** Celebrating Together — family list artwork */
 export const CELEBRATING_TOGETHER = `/images/celebrating-together@2x.png?${BUILD}`;
 
-/** Celebrating Together — bells overlay (white plate + multiply), same size as base PNG */
+/** Celebrating Together — mobile bells overlay (white plate + multiply) */
 export const CELEBRATING_TOGETHER_BELLS = `/images/celebrating-together-bells@2x.mp4?${BUILD}`;
 
 /** Our Story — Mac: single seamless scroll (Desktop “our story/desktop.png”) */

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { createPortal } from "react-dom";
+import { useIsDesktop } from "@/lib/use-is-desktop";
 import { armMutedLoopVideo, playMutedLoopVideo } from "./invite-video";
 import { PAGE_CREAM } from "./page-cream";
 import { useInviteOverlayFade } from "./use-invite-overlay-fade";
@@ -28,6 +29,7 @@ function useLoopingBellsVideo(
     const play = () => playMutedLoopVideo(el);
 
     armMutedLoopVideo(el);
+    el.load();
     play();
 
     const onVisibility = () => {
@@ -53,7 +55,7 @@ function useLoopingBellsVideo(
   }, [ref, enabled]);
 }
 
-/** Full-viewport Celebrating Together — base PNG + bells, invitation fade */
+/** Full-viewport Celebrating Together — base PNG + mobile bells overlay */
 export function CelebratingTogether({
   open,
   revealed = true,
@@ -62,13 +64,16 @@ export function CelebratingTogether({
   const [mounted, setMounted] = useState(false);
   const [bellsReady, setBellsReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const isDesktop = useIsDesktop();
+  /** Portrait bells plate is authored for phone; use it as the mobile overlay. */
+  const showBellsOverlay = !isDesktop;
   const { rendered, fadeStyle } = useInviteOverlayFade(open, revealed);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  useLoopingBellsVideo(videoRef, open);
+  useLoopingBellsVideo(videoRef, open && showBellsOverlay);
 
   useEffect(() => {
     if (!open) {
@@ -80,9 +85,14 @@ export function CelebratingTogether({
     let raf2 = 0;
     const raf1 = requestAnimationFrame(() => {
       raf2 = requestAnimationFrame(() => {
+        if (!showBellsOverlay) return;
         const el = videoRef.current;
         if (!el) return;
-        el.currentTime = 0;
+        try {
+          el.currentTime = 0;
+        } catch {
+          // ignore seek before metadata
+        }
         playMutedLoopVideo(el);
       });
     });
@@ -93,7 +103,7 @@ export function CelebratingTogether({
       document.documentElement.classList.remove("is-scroll-locked");
       videoRef.current?.pause();
     };
-  }, [open]);
+  }, [open, showBellsOverlay]);
 
   if (!mounted || !rendered) return null;
 
@@ -143,29 +153,35 @@ export function CelebratingTogether({
           fetchPriority="high"
           draggable={false}
         />
-        <video
-          ref={videoRef}
-          src={CELEBRATING_TOGETHER_BELLS}
-          className="invite-loop-video invite-bells-layer cover-media celebrating-cover"
-          style={{
-            opacity: bellsReady ? 1 : 0,
-            transition: "opacity 180ms ease-out",
-          }}
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="auto"
-          controls={false}
-          disablePictureInPicture
-          controlsList="nodownload nofullscreen noremoteplayback"
-          data-page="celebrating-together-bells"
-          onLoadedData={() => {
-            playMutedLoopVideo(videoRef.current);
-            setBellsReady(true);
-          }}
-          onCanPlay={() => setBellsReady(true)}
-        />
+        {showBellsOverlay && (
+          <video
+            ref={videoRef}
+            key={open ? "celebrating-bells-open" : "celebrating-bells-closed"}
+            src={CELEBRATING_TOGETHER_BELLS}
+            className="invite-loop-video invite-bells-layer cover-media celebrating-cover"
+            style={{
+              opacity: bellsReady ? 1 : 0,
+              transition: "opacity 180ms ease-out",
+            }}
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="auto"
+            controls={false}
+            disablePictureInPicture
+            controlsList="nodownload nofullscreen noremoteplayback"
+            data-page="celebrating-together-bells"
+            onLoadedData={() => {
+              playMutedLoopVideo(videoRef.current);
+              setBellsReady(true);
+            }}
+            onCanPlay={() => {
+              playMutedLoopVideo(videoRef.current);
+              setBellsReady(true);
+            }}
+          />
+        )}
       </div>
 
       <span className="sr-only">
