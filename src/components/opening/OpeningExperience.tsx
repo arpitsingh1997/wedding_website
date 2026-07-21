@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { BowScreen } from "./BowScreen";
 import { PAGE_CREAM } from "./page-cream";
 import { ThirdPage } from "./ThirdPage";
+import { ViewportModeSync } from "./ViewportModeSync";
 import { VisualViewportSync } from "./VisualViewportSync";
 
 type Phase = "closed" | "unwrapping" | "story";
@@ -80,6 +81,7 @@ export function OpeningExperience() {
       data-opening-phase={phase}
     >
       <VisualViewportSync />
+      <ViewportModeSync />
       {/* Always mounted under the bow so the invite video is painted before flaps open */}
       <ThirdPage
         inviteActive={phase === "unwrapping" || phase === "story"}

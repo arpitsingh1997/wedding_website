@@ -192,25 +192,49 @@
 }
 
 /*
- * Phone vs desktop art layers — CSS media, not React state, so desktop
- * always gets desklanding2 / desklanding3 (no phone-art flash).
+ * Phone vs desktop art layers.
+ * Use BOTH a width media query and html.is-desktop (set before paint)
+ * so desklanding2 / desklanding3 always show on real desktop windows.
  */
 .art-desktop {
   display: none !important;
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 768px) {
   .art-phone {
     display: none !important;
   }
 
-  .art-desktop {
+  img.art-desktop,
+  video.art-desktop {
     display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 }
 
+html.is-desktop .art-phone {
+  display: none !important;
+}
+
+html.is-desktop img.art-desktop,
+html.is-desktop video.art-desktop {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+html.is-phone .art-desktop {
+  display: none !important;
+}
+
+html.is-phone img.art-phone,
+html.is-phone video.art-phone {
+  display: block !important;
+}
+
 /* Desktop: prefer sharper decode for full-bleed invite / bow frames */
-@media (min-width: 1024px) {
+@media (min-width: 768px) {
   .cover-media {
     transform: translateZ(0);
     backface-visibility: hidden;
