@@ -44,6 +44,12 @@ export default function RootLayout({
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: VIEWPORT_BOOT_SCRIPT }} />
+        {/* Critical: show desklanding art on desktop before CSS chunk loads */}
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `.art-desktop{display:none!important}html.is-desktop .art-phone{display:none!important}html.is-desktop img.art-desktop,html.is-desktop video.art-desktop{display:block!important;visibility:visible!important;opacity:1!important}@media (min-width:768px){.art-phone{display:none!important}img.art-desktop,video.art-desktop{display:block!important}}`,
+          }}
+        />
         {/* Never restore prior scroll — always enter at the closed bow / invite top */}
         <script
           dangerouslySetInnerHTML={{

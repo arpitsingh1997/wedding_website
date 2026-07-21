@@ -248,7 +248,7 @@ export function PostRevealNav({
       data-page="landing3-scroll"
       data-layout={isDesktop ? "desktop" : "mobile"}
     >
-      <div className="relative mx-auto w-full max-w-[540px] lg:max-w-none">
+      <div className="relative mx-auto w-full max-w-[540px] md:max-w-none">
         {/* Phone scroll art */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
