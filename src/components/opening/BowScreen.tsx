@@ -6,7 +6,6 @@ import { startBowChime, stopBowChime } from "./bow-chime";
 import { LANDING, LANDING_DESKTOP } from "./landing-assets";
 import { LandingArt } from "./LandingArt";
 import { kickInviteVideoPlayback } from "./invite-video";
-import { DESKTOP_MIN_WIDTH } from "@/lib/viewport";
 
 type BowScreenProps = {
   isUnwrapping: boolean;
@@ -96,14 +95,15 @@ export function BowScreen({ isUnwrapping, onUnwrap, onUnwrapped }: BowScreenProp
 
       {!flapsOpening && (
         <div className="pointer-events-none absolute inset-0 z-40 overflow-hidden" aria-hidden>
-          <picture>
-            <source
-              media={`(min-width: ${DESKTOP_MIN_WIDTH}px)`}
-              srcSet={LANDING_DESKTOP}
-            />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={LANDING} alt="" className="cover-media" draggable={false} />
-          </picture>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={LANDING} alt="" className="cover-media art-phone" draggable={false} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={LANDING_DESKTOP}
+            alt=""
+            className="cover-media art-desktop"
+            draggable={false}
+          />
         </div>
       )}
 

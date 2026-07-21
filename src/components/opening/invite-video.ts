@@ -17,13 +17,11 @@ export function playMutedLoopVideo(el: HTMLVideoElement | null) {
   if (el.paused) void el.play().catch(() => {});
 }
 
-/** Unlock muted invite-loop autoplay after the bow tap (iPhone). */
+/** Unlock muted invite-loop autoplay after the bow tap (phone + desktop). */
 export function kickInviteVideoPlayback() {
-  playMutedLoopVideo(
-    document.querySelector(
-      'video[data-page="landing2-video"]'
-    ) as HTMLVideoElement | null
-  );
+  document
+    .querySelectorAll('video[data-page="landing2-video"]')
+    .forEach((node) => playMutedLoopVideo(node as HTMLVideoElement));
 }
 
 /** Start Celebrating Together bells (call from the nav tap — iPhone gesture). */

@@ -2,7 +2,6 @@
 
 import { LANDING, LANDING_DESKTOP } from "./landing-assets";
 import { PAGE_CREAM } from "./page-cream";
-import { DESKTOP_MIN_WIDTH } from "@/lib/viewport";
 
 type LandingArtProps = {
   side: "left" | "right";
@@ -25,21 +24,24 @@ export function LandingArt({ side }: LandingArtProps) {
           left: isLeft ? 0 : "-100%",
         }}
       >
-        <picture>
-          <source
-            media={`(min-width: ${DESKTOP_MIN_WIDTH}px)`}
-            srcSet={LANDING_DESKTOP}
-          />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={LANDING}
-            alt=""
-            decoding="sync"
-            fetchPriority="high"
-            draggable={false}
-            className="cover-media"
-          />
-        </picture>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={LANDING}
+          alt=""
+          decoding="sync"
+          fetchPriority="high"
+          draggable={false}
+          className="cover-media art-phone"
+        />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={LANDING_DESKTOP}
+          alt=""
+          decoding="sync"
+          fetchPriority="high"
+          draggable={false}
+          className="cover-media art-desktop"
+        />
       </div>
     </div>
   );

@@ -249,18 +249,26 @@ export function PostRevealNav({
       data-layout={isDesktop ? "desktop" : "mobile"}
     >
       <div className="relative mx-auto w-full max-w-[540px] lg:max-w-none">
-        <picture>
-          <source media="(min-width: 1024px)" srcSet={LANDING3_DESKTOP} />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={LANDING3_SCROLL}
-            alt="Countdown to our forever — Dharmi and Arpit"
-            className="crisp-image block h-auto w-full max-w-none select-none"
-            decoding="async"
-            fetchPriority="high"
-            draggable={false}
-          />
-        </picture>
+        {/* Phone scroll art */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={LANDING3_SCROLL}
+          alt="Countdown to our forever — Dharmi and Arpit"
+          className="crisp-image art-phone block h-auto w-full max-w-none select-none"
+          decoding="async"
+          fetchPriority="high"
+          draggable={false}
+        />
+        {/* Desktop scroll art — desklanding3@2x */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={LANDING3_DESKTOP}
+          alt="Countdown to our forever — Dharmi and Arpit"
+          className="crisp-image art-desktop block h-auto w-full max-w-none select-none"
+          decoding="async"
+          fetchPriority="high"
+          draggable={false}
+        />
 
         <div
           className="pointer-events-none absolute inset-x-0 z-[1] flex justify-center px-5"
