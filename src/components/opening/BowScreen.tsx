@@ -76,7 +76,7 @@ export function BowScreen({ isUnwrapping, onUnwrap, onUnwrapped }: BowScreenProp
         pointerEvents: isUnwrapping ? "none" : "auto",
       }}
       data-bow-screen={isUnwrapping ? "unwrapping" : "closed"}
-      data-bow-version="celesta-sunshine-v4"
+      data-bow-version="celesta-sunshine-v5"
     >
       <div
         className={`bow-flap bow-flap-left absolute inset-y-0 left-0 z-20 h-full overflow-hidden ${flapsOpening ? "is-opening" : ""}`}

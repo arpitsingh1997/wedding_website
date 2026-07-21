@@ -1,26 +1,32 @@
 /**
  * Bow unveil — soft celesta / music-box nod to “You Are My Sunshine.”
  *
- * First 3 notes only (not a recognizable tune):
- *   tonic → major 3rd → perfect 5th  (G–B–D triad)
- * Slow spacing (~300 ms), long airy reverb, quiet glass texture under.
+ * G5 → (+250ms) B5 → (+350ms) D6, with D6 ringing ~900ms.
+ * Long airy reverb + quiet glass texture under.
  * Elegant & delicate — not whimsical or magical.
  */
 
-export const BOW_CHIME_VERSION = "celesta-sunshine-v4";
+export const BOW_CHIME_VERSION = "celesta-sunshine-v5";
 
 const MASTER_VOLUME = 0.038;
-/** Cue length including reverb tail */
-const SEQUENCE_END_SEC = 1.2;
+/**
+ * Timeline:
+ *   G5 @ 0.00s
+ *   B5 @ 0.25s
+ *   D6 @ 0.60s  (rings ~0.90s → cue ends ~1.50s)
+ */
+const NOTE_STARTS = [0, 0.25, 0.6] as const;
+const D6_RING_SEC = 0.9;
+const SEQUENCE_END_SEC = NOTE_STARTS[2] + D6_RING_SEC;
 
 /**
  * Celesta register — soft, high, not piercing.
- * G5–B5–D6 — ascending major triad (sunshine interval shape).
+ * G5–B5–D6 — ascending major triad.
  */
 const MOTIF_HZ = [783.99, 987.77, 1174.66] as const;
-/** Wide, unhurried spacing between note attacks */
-const NOTE_GAP_SEC = 0.3;
-const NOTE_STARTS = MOTIF_HZ.map((_, i) => i * NOTE_GAP_SEC);
+/** Ring length per note (G/B shorter; D sustains)
+ */
+const NOTE_RING_SEC = [0.55, 0.65, D6_RING_SEC] as const;
 
 let sharedCtx: AudioContext | null = null;
 let masterGain: GainNode | null = null;
@@ -87,7 +93,7 @@ function noiseBurst(
  * Long natural hall — bright early air, gentle decay (~1.1s).
  * Kept soft so it feels luxurious, not sparkly.
  */
-function createHallImpulse(ctx: AudioContext, seconds = 1.1): AudioBuffer {
+function createHallImpulse(ctx: AudioContext, seconds = 1.35): AudioBuffer {
   const rate = ctx.sampleRate;
   const len = Math.ceil(rate * seconds);
   const buf = ctx.createBuffer(2, len, rate);
@@ -109,7 +115,7 @@ function createHallImpulse(ctx: AudioContext, seconds = 1.1): AudioBuffer {
 
 /**
  * One celesta / music-box note — soft attack, pure body, faint high partial.
- * Mild inharmonicity keeps it from sounding like a toy MIDI patch.
+ * `ringSec` scales the fundamental sustain (D6 uses ~900ms).
  */
 function playCelestaNote(
   ctx: AudioContext,
@@ -117,13 +123,15 @@ function playCelestaNote(
   wetDest: AudioNode,
   t0: number,
   freq: number,
-  velocity = 1
+  velocity = 1,
+  ringSec = 0.95
 ) {
+  const fund = Math.max(ringSec, 0.2);
   const partials: { ratio: number; gain: number; decay: number }[] = [
-    { ratio: 1, gain: 0.72 * velocity, decay: 0.95 },
-    { ratio: 2.003, gain: 0.22 * velocity, decay: 0.7 },
-    { ratio: 2.76, gain: 0.045 * velocity, decay: 0.42 },
-    { ratio: 5.43, gain: 0.018 * velocity, decay: 0.28 },
+    { ratio: 1, gain: 0.72 * velocity, decay: fund },
+    { ratio: 2.003, gain: 0.22 * velocity, decay: fund * 0.72 },
+    { ratio: 2.76, gain: 0.045 * velocity, decay: fund * 0.45 },
+    { ratio: 5.43, gain: 0.018 * velocity, decay: fund * 0.3 },
   ];
 
   // Soft hammer / mallet whisper
@@ -175,7 +183,7 @@ function playGlassTexture(
 ) {
   // Continuous soft glass air
   noiseBurst(ctx, wetDest, t0, {
-    duration: 1.05,
+    duration: 1.35,
     gain: 0.028,
     filterType: "bandpass",
     frequency: 4200,
@@ -183,7 +191,7 @@ function playGlassTexture(
     attack: 0.12,
   });
   noiseBurst(ctx, dryDest, t0 + 0.08, {
-    duration: 0.9,
+    duration: 1.2,
     gain: 0.012,
     filterType: "highpass",
     frequency: 6000,
@@ -193,7 +201,7 @@ function playGlassTexture(
 
   // Three sparse, quiet glass ticks (not a melody)
   const glassHz = [2093, 2637, 3136];
-  const glassAt = [0.12, 0.48, 0.82];
+  const glassAt = [0.12, 0.55, 1.05];
   for (let i = 0; i < glassHz.length; i++) {
     const when = t0 + glassAt[i];
     const freq = glassHz[i];
@@ -235,13 +243,13 @@ export function startBowChime() {
   dry.connect(masterGain);
 
   const convolver = ctx.createConvolver();
-  convolver.buffer = createHallImpulse(ctx, 1.1);
+  convolver.buffer = createHallImpulse(ctx, 1.35);
   const wet = ctx.createGain();
-  // Long natural bloom — present but restrained
+  // Long natural bloom under the D6 ring
   wet.gain.setValueAtTime(0.0001, now);
   wet.gain.exponentialRampToValueAtTime(0.7, now + 0.08);
-  wet.gain.exponentialRampToValueAtTime(0.45, now + 0.7);
-  wet.gain.exponentialRampToValueAtTime(0.0001, now + 1.18);
+  wet.gain.exponentialRampToValueAtTime(0.5, now + 0.9);
+  wet.gain.exponentialRampToValueAtTime(0.0001, now + SEQUENCE_END_SEC);
 
   const wetInput = ctx.createGain();
   wetInput.gain.value = 1;
@@ -251,8 +259,8 @@ export function startBowChime() {
 
   playGlassTexture(ctx, dry, wetInput, now);
 
-  // Motif: soft rise through the triad
-  const velocities = [0.76, 0.82, 0.88];
+  // Motif: G5 @0 → B5 @250ms → D6 @600ms (rings ~900ms)
+  const velocities = [0.76, 0.82, 0.9];
   for (let i = 0; i < MOTIF_HZ.length; i++) {
     playCelestaNote(
       ctx,
@@ -260,7 +268,8 @@ export function startBowChime() {
       wetInput,
       now + NOTE_STARTS[i],
       MOTIF_HZ[i],
-      velocities[i]
+      velocities[i],
+      NOTE_RING_SEC[i]
     );
   }
 
