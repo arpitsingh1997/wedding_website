@@ -1,5 +1,5 @@
 /** Bump when you replace the file in public/images/ (forces Mac/browser to reload) */
-export const LANDING_VERSION = "desklanding-bow-20260721k";
+export const LANDING_VERSION = "desklanding-bow-20260721m";
 
 /** Bow landing — phone */
 export const LANDING = `/images/landing@2x.png?v=${LANDING_VERSION}`;

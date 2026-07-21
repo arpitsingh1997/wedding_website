@@ -2,7 +2,7 @@
 
 import { LANDING, LANDING_DESKTOP } from "./landing-assets";
 import { PAGE_CREAM } from "./page-cream";
-import { useIsDesktop } from "@/lib/use-is-desktop";
+import { DESKTOP_MIN_WIDTH } from "@/lib/viewport";
 
 type LandingArtProps = {
   side: "left" | "right";
@@ -10,8 +10,6 @@ type LandingArtProps = {
 
 export function LandingArt({ side }: LandingArtProps) {
   const isLeft = side === "left";
-  const isDesktop = useIsDesktop();
-  const src = isDesktop ? LANDING_DESKTOP : LANDING;
 
   return (
     <div
@@ -27,15 +25,21 @@ export function LandingArt({ side }: LandingArtProps) {
           left: isLeft ? 0 : "-100%",
         }}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={src}
-          alt=""
-          decoding="sync"
-          fetchPriority="high"
-          draggable={false}
-          className="cover-media"
-        />
+        <picture>
+          <source
+            media={`(min-width: ${DESKTOP_MIN_WIDTH}px)`}
+            srcSet={LANDING_DESKTOP}
+          />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={LANDING}
+            alt=""
+            decoding="sync"
+            fetchPriority="high"
+            draggable={false}
+            className="cover-media"
+          />
+        </picture>
       </div>
     </div>
   );
