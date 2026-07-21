@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-export const BUILD = "jewelry-box-v2-reload-20260720z";
-=======
-export const BUILD = "nav-press-text-20260720y";
->>>>>>> a8bdb86 (Add 5-menu scroll, Celebrating Together, and related invite updates)
+export const BUILD = "conflict-fix-jewelry-5menu-20260721a";
 
 /** Phone invite — base art (Desktop landing2@2x.png) */
 export const LANDING2_PHONE = `/images/landing2@2x.png?${BUILD}`;
