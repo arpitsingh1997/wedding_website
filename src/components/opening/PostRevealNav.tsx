@@ -65,7 +65,8 @@ const MOBILE_NAV_ITEMS = [
 ] as const;
 
 /**
- * Desktop hit boxes — measured from desklanding3@2x.png (1366×768) 2×2 grid.
+ * Desktop hit boxes — desklanding3@2x.png (1366×768).
+ * 2×2 grid + More of Us (Instagram), matching mobile destinations.
  */
 const DESKTOP_NAV_ITEMS = [
   {
@@ -102,6 +103,15 @@ const DESKTOP_NAV_ITEMS = [
     left: "52.2%",
     width: "16.4%",
     height: "8.8%",
+  },
+  {
+    label: "More of Us",
+    href: INSTAGRAM_URL,
+    id: "more-of-us" as const,
+    top: "67.2%",
+    left: "31.3%",
+    width: "37.3%",
+    height: "5.8%",
   },
 ] as const;
 
