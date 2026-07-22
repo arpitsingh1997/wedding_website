@@ -43,7 +43,14 @@ export function pushInviteStep(step: InviteHistoryStep) {
   history.pushState({ m: MARKER, step } satisfies InviteHistoryState, "", cleanPath());
 }
 
-export function isDestinationStep(step: InviteHistoryStep): boolean {
+export type InviteDestinationStep =
+  | "our-story"
+  | "save-the-date"
+  | "celebrating-together";
+
+export function isDestinationStep(
+  step: InviteHistoryStep
+): step is InviteDestinationStep {
   return (
     step === "our-story" ||
     step === "save-the-date" ||
@@ -52,9 +59,7 @@ export function isDestinationStep(step: InviteHistoryStep): boolean {
 }
 
 /** Ensure scroll is under the destination so Back lands on the menu page. */
-export function pushDestinationStep(
-  step: "our-story" | "save-the-date" | "celebrating-together"
-) {
+export function pushDestinationStep(step: InviteDestinationStep) {
   const current = readInviteStep();
   if (current !== "scroll" && !isDestinationStep(current ?? "bow")) {
     pushInviteStep("scroll");
