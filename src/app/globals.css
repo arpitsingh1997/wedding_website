@@ -126,6 +126,7 @@
 /*
  * landing2a bells video uses a white plate. Multiply makes white see-through
  * so landing2@2x.png stays visible underneath; only the bells composite.
+ * (Do not use SVG filters on these videos — they break playback on iOS.)
  */
 .invite-bells-layer {
   mix-blend-mode: multiply;

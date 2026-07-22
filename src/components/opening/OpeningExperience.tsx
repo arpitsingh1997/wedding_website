@@ -1,9 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { BowScreen } from "./BowScreen";
+import {
+  pushInviteStep,
+  readInviteStep,
+  replaceInviteStep,
+  type InviteHistoryStep,
+} from "./invite-history";
 import { PAGE_CREAM } from "./page-cream";
-import { ThirdPage } from "./ThirdPage";
+import { ThirdPage, type ThirdPageHandle } from "./ThirdPage";
 import { ViewportModeSync } from "./ViewportModeSync";
 import { VisualViewportSync } from "./VisualViewportSync";
 
@@ -23,9 +29,8 @@ function resetInviteEntry() {
   } catch {
     // ignore
   }
-  if (window.location.hash) {
-    history.replaceState(null, "", window.location.pathname + window.location.search);
-  }
+  const step = readInviteStep() ?? "bow";
+  replaceInviteStep(step);
   window.scrollTo(0, 0);
   document.documentElement.scrollTop = 0;
   document.body.scrollTop = 0;
@@ -33,21 +38,45 @@ function resetInviteEntry() {
 
 export function OpeningExperience() {
   const [phase, setPhase] = useState<Phase>("closed");
+  const thirdPageRef = useRef<ThirdPageHandle>(null);
+  const phaseRef = useRef(phase);
+  phaseRef.current = phase;
 
   const startUnwrap = useCallback(() => {
     setPhase("unwrapping");
   }, []);
 
   const finishUnwrap = useCallback(() => {
-    // Land on invite top after the bow, not wherever they left off last visit
     resetInviteEntry();
     setPhase("story");
+    pushInviteStep("invite");
   }, []);
 
   const showBow = phase === "closed" || phase === "unwrapping";
 
+  const applyHistoryStep = useCallback((step: InviteHistoryStep) => {
+    if (step === "bow") {
+      thirdPageRef.current?.resetToInviteTop();
+      setPhase("closed");
+      window.scrollTo(0, 0);
+      return;
+    }
+
+    // Any step past the bow: ensure the envelope is gone
+    if (phaseRef.current !== "story") {
+      setPhase("story");
+    }
+    thirdPageRef.current?.applyHistoryStep(step);
+  }, []);
+
   useEffect(() => {
+    replaceInviteStep("bow");
     resetInviteEntry();
+
+    const onPopState = (event: PopStateEvent) => {
+      const step = readInviteStep(event.state) ?? "bow";
+      applyHistoryStep(step);
+    };
 
     const onPageShow = (event: PageTransitionEvent) => {
       // Back/forward cache can restore mid-scroll or open phase — force a clean entry
@@ -58,9 +87,13 @@ export function OpeningExperience() {
       resetInviteEntry();
     };
 
+    window.addEventListener("popstate", onPopState);
     window.addEventListener("pageshow", onPageShow);
-    return () => window.removeEventListener("pageshow", onPageShow);
-  }, []);
+    return () => {
+      window.removeEventListener("popstate", onPopState);
+      window.removeEventListener("pageshow", onPageShow);
+    };
+  }, [applyHistoryStep]);
 
   // Lock page scroll while the bow covers the invite; unlock afterward so Chrome can hide chrome on scroll
   useEffect(() => {
@@ -82,9 +115,10 @@ export function OpeningExperience() {
     >
       <VisualViewportSync />
       <ViewportModeSync />
-      {/* Always mounted under the bow so the invite video is painted before flaps open */}
+      {/* Invite always mounted + active under the bow so it peeks as flaps open */}
       <ThirdPage
-        inviteActive={phase === "unwrapping" || phase === "story"}
+        ref={thirdPageRef}
+        inviteActive
         interactive={phase === "story"}
       />
       {showBow && (

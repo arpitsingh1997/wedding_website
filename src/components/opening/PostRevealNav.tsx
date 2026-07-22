@@ -45,6 +45,7 @@ const MOBILE_NAV_ITEMS = [
   {
     label: "Wedding Events",
     href: "#events",
+    id: "events" as const,
     top: "56.15%",
     ...MOBILE_BTN,
   },
@@ -65,14 +66,14 @@ const MOBILE_NAV_ITEMS = [
 ] as const;
 
 /**
- * Desktop hit boxes — new desklanding3@2x.png (1366×768):
+ * Desktop hit boxes — desklanding3@2x.png (1366×768), full printed frames:
  * Row1: Our Story | Events
  * Row2: Save the Date | More of Us (Instagram)
  * Row3: Celebrating Together (centered)
  */
 const DESKTOP_BTN = {
   width: "16.4%",
-  height: "5.6%",
+  height: "6.77%",
 } as const;
 
 const DESKTOP_NAV_ITEMS = [
@@ -80,14 +81,15 @@ const DESKTOP_NAV_ITEMS = [
     label: "Our Story",
     href: "#our-story",
     id: "our-story" as const,
-    top: "40.2%",
+    top: "41.15%",
     left: "31.3%",
     ...DESKTOP_BTN,
   },
   {
     label: "Wedding Events",
     href: "#events",
-    top: "40.2%",
+    id: "events" as const,
+    top: "41.15%",
     left: "52.2%",
     ...DESKTOP_BTN,
   },
@@ -95,7 +97,7 @@ const DESKTOP_NAV_ITEMS = [
     label: "Save the Date",
     href: "#save-the-date",
     id: "save-the-date" as const,
-    top: "49.0%",
+    top: "50.13%",
     left: "31.3%",
     ...DESKTOP_BTN,
   },
@@ -103,7 +105,7 @@ const DESKTOP_NAV_ITEMS = [
     label: "More of Us",
     href: INSTAGRAM_URL,
     id: "more-of-us" as const,
-    top: "49.0%",
+    top: "50.13%",
     left: "52.2%",
     ...DESKTOP_BTN,
   },
@@ -111,10 +113,10 @@ const DESKTOP_NAV_ITEMS = [
     label: "Celebrating Together",
     href: "#celebrating-together",
     id: "celebrating-together" as const,
-    top: "57.8%",
-    left: "34.5%",
-    width: "31%",
-    height: "5.6%",
+    top: "58.98%",
+    left: "37.2%",
+    width: "25.5%",
+    height: "6.77%",
   },
 ] as const;
 
@@ -122,7 +124,8 @@ export type InviteNavDestination =
   | "our-story"
   | "save-the-date"
   | "celebrating-together"
-  | "more-of-us";
+  | "more-of-us"
+  | "events";
 
 type NavItemId = InviteNavDestination;
 
@@ -183,6 +186,8 @@ export function PostRevealNav({
         openInstagramProfile("dharmiandarpit");
         return;
       }
+      // Events page not ready yet — still accepts the full-button press
+      if (id === "events") return;
       onNavigate?.(id);
     },
     [navigationLocked, onNavigate]
@@ -203,7 +208,7 @@ export function PostRevealNav({
 
   const onPointerDown = (item: NavItem, e: PointerEvent<HTMLAnchorElement>) => {
     if (navigationLocked) return;
-    if (!item.id) return; // Wedding Events — no destination yet
+    if (!item.id) return;
     if (e.button !== 0 && e.pointerType === "mouse") return;
 
     e.preventDefault();

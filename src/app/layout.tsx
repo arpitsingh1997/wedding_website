@@ -1,5 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Pinyon_Script } from "next/font/google";
+import { LANDING, LANDING_DESKTOP } from "@/components/opening/landing-assets";
+import {
+  LANDING2_DESKTOP,
+  LANDING2_PHONE,
+} from "@/components/opening/welcome-assets";
 import { VIEWPORT_BOOT_SCRIPT } from "@/lib/viewport-boot";
 import "./globals.css";
 
@@ -50,6 +55,11 @@ export default function RootLayout({
             __html: `.art-desktop{display:none!important}html.is-desktop .art-phone{display:none!important}html.is-desktop img.art-desktop,html.is-desktop video.art-desktop{display:block!important;visibility:visible!important;opacity:1!important}@media (min-width:768px){.art-phone{display:none!important}img.art-desktop,video.art-desktop{display:block!important}}`,
           }}
         />
+        {/* Warm bow + invite art so reload paints envelope first with invite ready underneath */}
+        <link rel="preload" as="image" href={LANDING} />
+        <link rel="preload" as="image" href={LANDING_DESKTOP} />
+        <link rel="preload" as="image" href={LANDING2_PHONE} />
+        <link rel="preload" as="image" href={LANDING2_DESKTOP} />
         {/* Never restore prior scroll — always enter at the closed bow / invite top */}
         <script
           dangerouslySetInnerHTML={{

@@ -1,4 +1,4 @@
-export const BUILD = "new-desklanding-nav-20260721r";
+export const BUILD = "landing2a-20260722f";
 
 /** Phone invite — base art (Desktop landing2@2x.png) */
 export const LANDING2_PHONE = `/images/landing2@2x.png?${BUILD}`;
@@ -13,7 +13,7 @@ export const LANDING2_POSTER = LANDING2_PHONE;
 export const LANDING2_DESKTOP = `/images/desklanding2@2x.png?${BUILD}`;
 
 /** Desktop invite — bells overlay (desklanding2a@2x.mp4), white plate + multiply */
-export const LANDING2A_DESKTOP_VIDEO = `/images/desklanding2a@2x.mp4?${BUILD}`;
+export const LANDING2A_DESKTOP_VIDEO = `/images/desklanding2a@2x.mp4?desklanding2a-20260722g`;
 
 /** Scroll-down page — phone countdown + vertical nav artwork */
 export const LANDING3_SCROLL = `/images/landing3@2x.png?${BUILD}`;
@@ -21,11 +21,17 @@ export const LANDING3_SCROLL = `/images/landing3@2x.png?${BUILD}`;
 /** Scroll-down page — desktop countdown + nav (desklanding3@2x.png) */
 export const LANDING3_DESKTOP = `/images/desklanding3@2x.png?${BUILD}`;
 
-/** Celebrating Together — family list artwork */
+/** Celebrating Together — phone artwork */
 export const CELEBRATING_TOGETHER = `/images/celebrating-together@2x.png?${BUILD}`;
+
+/** Celebrating Together — desktop artwork (desk celebrating together) */
+export const CELEBRATING_TOGETHER_DESKTOP = `/images/celebrating-together-desktop.png?${BUILD}`;
 
 /** Celebrating Together — mobile bells overlay (white plate + multiply) */
 export const CELEBRATING_TOGETHER_BELLS = `/images/celebrating-together-bells@2x.mp4?${BUILD}`;
+
+/** Celebrating Together — desktop bells overlay (desk celebrating bells) */
+export const CELEBRATING_TOGETHER_BELLS_DESKTOP = `/images/celebrating-together-bells-desktop.mp4?${BUILD}`;
 
 /** Our Story — Mac: single seamless scroll (Desktop “our story/desktop.png”) */
 export const OUR_STORY_DESKTOP = `/images/our-story-scroll/desktop.png?${BUILD}`;

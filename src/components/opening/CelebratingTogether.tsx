@@ -8,6 +8,8 @@ import { useInviteOverlayFade } from "./use-invite-overlay-fade";
 import {
   CELEBRATING_TOGETHER,
   CELEBRATING_TOGETHER_BELLS,
+  CELEBRATING_TOGETHER_BELLS_DESKTOP,
+  CELEBRATING_TOGETHER_DESKTOP,
 } from "./welcome-assets";
 
 type CelebratingTogetherProps = {
@@ -54,26 +56,76 @@ function useLoopingBellsVideo(
   }, [ref, enabled]);
 }
 
-/** Full-viewport Celebrating Together — base PNG + mobile bells overlay */
+function BellsOverlayVideo({
+  videoRef,
+  src,
+  open,
+  ready,
+  onReady,
+  artClass,
+}: {
+  videoRef: RefObject<HTMLVideoElement | null>;
+  src: string;
+  open: boolean;
+  ready: boolean;
+  onReady: () => void;
+  artClass: string;
+}) {
+  return (
+    <video
+      ref={videoRef}
+      key={open ? `${artClass}-open` : `${artClass}-closed`}
+      src={src}
+      className={`invite-loop-video invite-bells-layer cover-media celebrating-cover ${artClass}`}
+      style={{
+        opacity: ready ? 1 : 0,
+        transition: "opacity 180ms ease-out",
+      }}
+      autoPlay
+      loop
+      muted
+      playsInline
+      preload="auto"
+      controls={false}
+      disablePictureInPicture
+      controlsList="nodownload nofullscreen noremoteplayback"
+      data-page="celebrating-together-bells"
+      onLoadedData={() => {
+        playMutedLoopVideo(videoRef.current);
+        onReady();
+      }}
+      onCanPlay={() => {
+        playMutedLoopVideo(videoRef.current);
+        onReady();
+      }}
+    />
+  );
+}
+
+/** Full-viewport Celebrating Together — base PNG + bells overlay (phone + desktop) */
 export function CelebratingTogether({
   open,
   revealed = true,
   onClose,
 }: CelebratingTogetherProps) {
   const [mounted, setMounted] = useState(false);
-  const [bellsReady, setBellsReady] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const [phoneBellsReady, setPhoneBellsReady] = useState(false);
+  const [deskBellsReady, setDeskBellsReady] = useState(false);
+  const phoneVideoRef = useRef<HTMLVideoElement>(null);
+  const deskVideoRef = useRef<HTMLVideoElement>(null);
   const { rendered, fadeStyle } = useInviteOverlayFade(open, revealed);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  useLoopingBellsVideo(videoRef, open);
+  useLoopingBellsVideo(phoneVideoRef, open);
+  useLoopingBellsVideo(deskVideoRef, open);
 
   useEffect(() => {
     if (!open) {
-      setBellsReady(false);
+      setPhoneBellsReady(false);
+      setDeskBellsReady(false);
       return;
     }
     document.documentElement.classList.add("is-scroll-locked");
@@ -81,14 +133,15 @@ export function CelebratingTogether({
     let raf2 = 0;
     const raf1 = requestAnimationFrame(() => {
       raf2 = requestAnimationFrame(() => {
-        const el = videoRef.current;
-        if (!el) return;
-        try {
-          el.currentTime = 0;
-        } catch {
-          // ignore seek before metadata
+        for (const el of [phoneVideoRef.current, deskVideoRef.current]) {
+          if (!el) continue;
+          try {
+            el.currentTime = 0;
+          } catch {
+            // ignore seek before metadata
+          }
+          playMutedLoopVideo(el);
         }
-        playMutedLoopVideo(el);
       });
     });
 
@@ -96,7 +149,8 @@ export function CelebratingTogether({
       cancelAnimationFrame(raf1);
       cancelAnimationFrame(raf2);
       document.documentElement.classList.remove("is-scroll-locked");
-      videoRef.current?.pause();
+      phoneVideoRef.current?.pause();
+      deskVideoRef.current?.pause();
     };
   }, [open]);
 
@@ -136,7 +190,8 @@ export function CelebratingTogether({
       {/*
         object-cover: edge-to-edge fill (no cream side gutters).
         isolation: bells multiply against the PNG only (iOS).
-        Mobile: celebrating-together-bells@2x.mp4 as the animated overlay.
+        Mobile: celebrating-together@2x.png + celebrating-together-bells.
+        Desktop: desk celebrating together + desk celebrating bells.
       */}
       <div
         className="pointer-events-none absolute inset-0 overflow-hidden"
@@ -147,37 +202,35 @@ export function CelebratingTogether({
         <img
           src={CELEBRATING_TOGETHER}
           alt=""
-          className="cover-media celebrating-cover"
+          className="cover-media celebrating-cover art-phone"
           decoding="sync"
           fetchPriority="high"
           draggable={false}
         />
-        <video
-          ref={videoRef}
-          key={open ? "celebrating-bells-open" : "celebrating-bells-closed"}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={CELEBRATING_TOGETHER_DESKTOP}
+          alt=""
+          className="cover-media celebrating-cover art-desktop"
+          decoding="sync"
+          fetchPriority="high"
+          draggable={false}
+        />
+        <BellsOverlayVideo
+          videoRef={phoneVideoRef}
           src={CELEBRATING_TOGETHER_BELLS}
-          className="invite-loop-video invite-bells-layer cover-media celebrating-cover"
-          style={{
-            opacity: bellsReady ? 1 : 0,
-            transition: "opacity 180ms ease-out",
-          }}
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="auto"
-          controls={false}
-          disablePictureInPicture
-          controlsList="nodownload nofullscreen noremoteplayback"
-          data-page="celebrating-together-bells"
-          onLoadedData={() => {
-            playMutedLoopVideo(videoRef.current);
-            setBellsReady(true);
-          }}
-          onCanPlay={() => {
-            playMutedLoopVideo(videoRef.current);
-            setBellsReady(true);
-          }}
+          open={open}
+          ready={phoneBellsReady}
+          onReady={() => setPhoneBellsReady(true)}
+          artClass="art-phone"
+        />
+        <BellsOverlayVideo
+          videoRef={deskVideoRef}
+          src={CELEBRATING_TOGETHER_BELLS_DESKTOP}
+          open={open}
+          ready={deskBellsReady}
+          onReady={() => setDeskBellsReady(true)}
+          artClass="art-desktop"
         />
       </div>
 
