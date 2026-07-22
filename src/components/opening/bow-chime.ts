@@ -1,32 +1,24 @@
 /**
- * Bow unveil — soft celesta / music-box nod to “You Are My Sunshine.”
+ * Bow unveil — two overlapping held piano notes.
  *
- * G5 → (+250ms) B5 → (+350ms) D6, with D6 ringing ~900ms.
- * Long airy reverb + quiet glass texture under.
- * Elegant & delicate — not whimsical or magical.
+ *   0.00  G4 (hold)
+ *   0.45  D5 (hold)
+ * Both overlap; G4 keeps ringing under D5.
  */
 
-export const BOW_CHIME_VERSION = "celesta-sunshine-v5";
+export const BOW_CHIME_VERSION = "piano-g4-d5-overlap-v1";
 
-const MASTER_VOLUME = 0.038;
-/**
- * Timeline:
- *   G5 @ 0.00s
- *   B5 @ 0.25s
- *   D6 @ 0.60s  (rings ~0.90s → cue ends ~1.50s)
- */
-const NOTE_STARTS = [0, 0.25, 0.6] as const;
-const D6_RING_SEC = 0.9;
-const SEQUENCE_END_SEC = NOTE_STARTS[2] + D6_RING_SEC;
+const MASTER_VOLUME = 0.042;
 
-/**
- * Celesta register — soft, high, not piercing.
- * G5–B5–D6 — ascending major triad.
- */
-const MOTIF_HZ = [783.99, 987.77, 1174.66] as const;
-/** Ring length per note (G/B shorter; D sustains)
- */
-const NOTE_RING_SEC = [0.55, 0.65, D6_RING_SEC] as const;
+const G4_START = 0;
+const D5_START = 0.45;
+const G4_HOLD_SEC = 2.0;
+const D5_HOLD_SEC = 1.8;
+const SEQUENCE_END_SEC = Math.max(G4_START + G4_HOLD_SEC, D5_START + D5_HOLD_SEC) + 0.2;
+
+/** Equal-temperament Hz (A4 = 440) */
+const G4_HZ = 392.0;
+const D5_HZ = 587.33;
 
 let sharedCtx: AudioContext | null = null;
 let masterGain: GainNode | null = null;
@@ -49,7 +41,6 @@ function clearStopTimer() {
   stopTimer = null;
 }
 
-/** Soft filtered noise for glass / air texture */
 function noiseBurst(
   ctx: AudioContext,
   dest: AudioNode,
@@ -68,7 +59,7 @@ function noiseBurst(
   const buf = ctx.createBuffer(1, frames, ctx.sampleRate);
   const data = buf.getChannelData(0);
   for (let i = 0; i < frames; i++) {
-    data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (frames * 0.55));
+    data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (frames * 0.45));
   }
 
   const src = ctx.createBufferSource();
@@ -89,11 +80,7 @@ function noiseBurst(
   src.stop(t0 + duration + 0.04);
 }
 
-/**
- * Long natural hall — bright early air, gentle decay (~1.1s).
- * Kept soft so it feels luxurious, not sparkly.
- */
-function createHallImpulse(ctx: AudioContext, seconds = 1.35): AudioBuffer {
+function createHallImpulse(ctx: AudioContext, seconds = 2.0): AudioBuffer {
   const rate = ctx.sampleRate;
   const len = Math.ceil(rate * seconds);
   const buf = ctx.createBuffer(2, len, rate);
@@ -101,122 +88,72 @@ function createHallImpulse(ctx: AudioContext, seconds = 1.35): AudioBuffer {
     const data = buf.getChannelData(ch);
     for (let i = 0; i < len; i++) {
       const t = i / rate;
-      const env = Math.exp(-t * 2.4) * (1 - t / seconds);
-      const early = t < 0.05 ? Math.exp(-t * 40) * 0.4 : 0;
+      const env = Math.exp(-t * 2.0) * (1 - t / seconds);
+      const early = t < 0.06 ? Math.exp(-t * 34) * 0.32 : 0;
       let sample =
-        (Math.random() * 2 - 1) * env * 0.5 +
-        (Math.random() * 2 - 1) * early * 0.28;
-      if (ch === 1) sample *= 0.93 + Math.sin(i * 0.0018) * 0.035;
+        (Math.random() * 2 - 1) * env * 0.46 +
+        (Math.random() * 2 - 1) * early * 0.22;
+      if (ch === 1) sample *= 0.94 + Math.sin(i * 0.0015) * 0.03;
       data[i] = sample;
     }
   }
   return buf;
 }
 
-/**
- * One celesta / music-box note — soft attack, pure body, faint high partial.
- * `ringSec` scales the fundamental sustain (D6 uses ~900ms).
- */
-function playCelestaNote(
+/** Soft felt-piano note with long hold */
+function playHeldPianoNote(
   ctx: AudioContext,
   dryDest: AudioNode,
   wetDest: AudioNode,
   t0: number,
   freq: number,
-  velocity = 1,
-  ringSec = 0.95
+  velocity: number,
+  holdSec: number
 ) {
-  const fund = Math.max(ringSec, 0.2);
-  const partials: { ratio: number; gain: number; decay: number }[] = [
-    { ratio: 1, gain: 0.72 * velocity, decay: fund },
-    { ratio: 2.003, gain: 0.22 * velocity, decay: fund * 0.72 },
-    { ratio: 2.76, gain: 0.045 * velocity, decay: fund * 0.45 },
-    { ratio: 5.43, gain: 0.018 * velocity, decay: fund * 0.3 },
-  ];
+  const fadeIn = 0.02;
+  const fadeOut = 0.65;
+  const end = t0 + holdSec;
 
-  // Soft hammer / mallet whisper
   noiseBurst(ctx, dryDest, t0, {
-    duration: 0.028,
-    gain: 0.045 * velocity,
-    filterType: "bandpass",
-    frequency: freq * 1.15,
-    Q: 1.4,
+    duration: 0.032,
+    gain: 0.048 * velocity,
+    filterType: "lowpass",
+    frequency: Math.min(freq * 3.0, 2600),
+    Q: 0.9,
     attack: 0.002,
   });
+
+  const partials: { ratio: number; gain: number }[] = [
+    { ratio: 1, gain: 0.78 * velocity },
+    { ratio: 2.01, gain: 0.26 * velocity },
+    { ratio: 3.02, gain: 0.09 * velocity },
+    { ratio: 4.04, gain: 0.03 * velocity },
+  ];
 
   for (const p of partials) {
     const osc = ctx.createOscillator();
     const amp = ctx.createGain();
     const filter = ctx.createBiquadFilter();
     osc.type = "sine";
-    // Tiny detune drift — celesta, not a perfect synth sine
-    const f = freq * p.ratio * (1 + (Math.random() - 0.5) * 0.0015);
+    const f = freq * p.ratio * (1 + (Math.random() - 0.5) * 0.001);
     osc.frequency.setValueAtTime(f, t0);
 
     filter.type = "lowpass";
-    filter.frequency.setValueAtTime(5200, t0);
-    filter.frequency.exponentialRampToValueAtTime(2400, t0 + p.decay * 0.6);
+    filter.frequency.setValueAtTime(3600, t0);
+    filter.frequency.exponentialRampToValueAtTime(1500, end);
 
     const peak = Math.max(p.gain, 0.0002);
     amp.gain.setValueAtTime(0.0001, t0);
-    amp.gain.exponentialRampToValueAtTime(peak, t0 + 0.012);
-    amp.gain.exponentialRampToValueAtTime(0.0001, t0 + p.decay);
+    amp.gain.exponentialRampToValueAtTime(peak, t0 + fadeIn);
+    amp.gain.setValueAtTime(peak, Math.max(t0 + fadeIn, end - fadeOut));
+    amp.gain.exponentialRampToValueAtTime(0.0001, end);
 
     osc.connect(filter);
     filter.connect(amp);
     amp.connect(dryDest);
     amp.connect(wetDest);
     osc.start(t0);
-    osc.stop(t0 + p.decay + 0.06);
-  }
-}
-
-/**
- * Very soft glass wind-chime bed — sparse high glass ticks + airy shimmer.
- * Stays under the motif; never a cascade or sparkle shower.
- */
-function playGlassTexture(
-  ctx: AudioContext,
-  dryDest: AudioNode,
-  wetDest: AudioNode,
-  t0: number
-) {
-  // Continuous soft glass air
-  noiseBurst(ctx, wetDest, t0, {
-    duration: 1.35,
-    gain: 0.028,
-    filterType: "bandpass",
-    frequency: 4200,
-    Q: 0.55,
-    attack: 0.12,
-  });
-  noiseBurst(ctx, dryDest, t0 + 0.08, {
-    duration: 1.2,
-    gain: 0.012,
-    filterType: "highpass",
-    frequency: 6000,
-    Q: 0.6,
-    attack: 0.18,
-  });
-
-  // Three sparse, quiet glass ticks (not a melody)
-  const glassHz = [2093, 2637, 3136];
-  const glassAt = [0.12, 0.55, 1.05];
-  for (let i = 0; i < glassHz.length; i++) {
-    const when = t0 + glassAt[i];
-    const freq = glassHz[i];
-    const osc = ctx.createOscillator();
-    const amp = ctx.createGain();
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(freq, when);
-    amp.gain.setValueAtTime(0.0001, when);
-    amp.gain.exponentialRampToValueAtTime(0.055, when + 0.004);
-    amp.gain.exponentialRampToValueAtTime(0.0001, when + 0.55);
-    osc.connect(amp);
-    amp.connect(dryDest);
-    amp.connect(wetDest);
-    osc.start(when);
-    osc.stop(when + 0.6);
+    osc.stop(end + 0.08);
   }
 }
 
@@ -239,16 +176,15 @@ export function startBowChime() {
   masterGain.connect(ctx.destination);
 
   const dry = ctx.createGain();
-  dry.gain.value = 0.85;
+  dry.gain.value = 0.88;
   dry.connect(masterGain);
 
   const convolver = ctx.createConvolver();
-  convolver.buffer = createHallImpulse(ctx, 1.35);
+  convolver.buffer = createHallImpulse(ctx, 2.0);
   const wet = ctx.createGain();
-  // Long natural bloom under the D6 ring
   wet.gain.setValueAtTime(0.0001, now);
-  wet.gain.exponentialRampToValueAtTime(0.7, now + 0.08);
-  wet.gain.exponentialRampToValueAtTime(0.5, now + 0.9);
+  wet.gain.exponentialRampToValueAtTime(0.6, now + 0.1);
+  wet.gain.exponentialRampToValueAtTime(0.45, now + 1.2);
   wet.gain.exponentialRampToValueAtTime(0.0001, now + SEQUENCE_END_SEC);
 
   const wetInput = ctx.createGain();
@@ -257,21 +193,9 @@ export function startBowChime() {
   convolver.connect(wet);
   wet.connect(masterGain);
 
-  playGlassTexture(ctx, dry, wetInput, now);
-
-  // Motif: G5 @0 → B5 @250ms → D6 @600ms (rings ~900ms)
-  const velocities = [0.76, 0.82, 0.9];
-  for (let i = 0; i < MOTIF_HZ.length; i++) {
-    playCelestaNote(
-      ctx,
-      dry,
-      wetInput,
-      now + NOTE_STARTS[i],
-      MOTIF_HZ[i],
-      velocities[i],
-      NOTE_RING_SEC[i]
-    );
-  }
+  // G4 starts and holds; D5 enters at 0.45s and overlaps
+  playHeldPianoNote(ctx, dry, wetInput, now + G4_START, G4_HZ, 0.82, G4_HOLD_SEC);
+  playHeldPianoNote(ctx, dry, wetInput, now + D5_START, D5_HZ, 0.88, D5_HOLD_SEC);
 
   if (typeof document !== "undefined") {
     document.documentElement.dataset.bowChime = BOW_CHIME_VERSION;
@@ -296,7 +220,7 @@ export function stopBowChime(force = false) {
   if (!ctx || !master) return;
 
   const now = ctx.currentTime;
-  const fade = force ? 0.06 : 0.32;
+  const fade = force ? 0.06 : 0.4;
   try {
     master.gain.cancelScheduledValues(now);
     master.gain.setValueAtTime(Math.max(master.gain.value, 0.0001), now);

@@ -26,9 +26,35 @@ export function kickInviteVideoPlayback() {
 
 /** Start Celebrating Together bells (call from the nav tap — iPhone gesture). */
 export function kickCelebratingBellsPlayback() {
-  playMutedLoopVideo(
-    document.querySelector(
-      'video[data-page="celebrating-together-bells"]'
-    ) as HTMLVideoElement | null
-  );
+  document
+    .querySelectorAll('video[data-page="celebrating-together-bells"]')
+    .forEach((node) => playMutedLoopVideo(node as HTMLVideoElement));
+}
+
+/**
+ * Start Save the Date with sound inside the nav tap gesture (iPhone).
+ * Must run in the same turn as flushSync mount — play() after await is blocked.
+ */
+export function kickSaveTheDatePlayback() {
+  const el = document.querySelector(
+    'video[data-video="save-the-date"]'
+  ) as HTMLVideoElement | null;
+  if (!el) return;
+
+  el.muted = false;
+  el.defaultMuted = false;
+  el.playsInline = true;
+  el.setAttribute("playsinline", "");
+  el.setAttribute("webkit-playsinline", "");
+  el.controls = false;
+
+  try {
+    el.load();
+  } catch {
+    // ignore
+  }
+
+  void el.play().catch(() => {
+    // Will retry from loadeddata / canplay while open
+  });
 }

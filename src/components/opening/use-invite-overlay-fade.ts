@@ -43,6 +43,9 @@ export function useInviteOverlayFade(open: boolean, revealed = true) {
     fadeStyle: {
       opacity: visible ? 1 : 0,
       transition: `opacity ${PAGE_FADE_IN_MS}ms ease`,
+      // Stay click-through until fade-in so nav pointerup can finish
+      // (otherwise the invisible overlay steals the gesture).
+      pointerEvents: visible ? "auto" : "none",
     } as const,
   };
 }

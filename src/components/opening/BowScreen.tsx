@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import { startBowChime, stopBowChime } from "./bow-chime";
 import { LANDING, LANDING_DESKTOP } from "./landing-assets";
 import { LandingArt } from "./LandingArt";
@@ -21,14 +20,16 @@ const FLAP_MS = 1000;
 const SETTLE_MS = 50;
 const TOTAL_MS = HOLD_MS + FLAP_MS + SETTLE_MS;
 
+/**
+ * Closed-bow overlay. Rendered in-tree (not a portal) so it covers the invite
+ * on the first paint — including SSR/hydration — with no invite flash.
+ */
 export function BowScreen({ isUnwrapping, onUnwrap, onUnwrapped }: BowScreenProps) {
-  const [mounted, setMounted] = useState(false);
   const [flapsOpening, setFlapsOpening] = useState(false);
   const advanced = useRef(false);
   const finished = useRef(false);
 
   useEffect(() => {
-    setMounted(true);
     return () => stopBowChime(true);
   }, []);
 
@@ -60,17 +61,16 @@ export function BowScreen({ isUnwrapping, onUnwrap, onUnwrapped }: BowScreenProp
     onUnwrap();
   }, [isUnwrapping, onUnwrap]);
 
-  if (!mounted) return null;
-
-  return createPortal(
+  return (
     <div
       className="full-viewport z-[100050]"
       style={{
+        // Transparent so the invite (already mounted underneath) peeks as flaps open
         backgroundColor: "transparent",
         pointerEvents: isUnwrapping ? "none" : "auto",
       }}
       data-bow-screen={isUnwrapping ? "unwrapping" : "closed"}
-      data-bow-version="celesta-sunshine-v5"
+      data-bow-version="piano-g4-d5-overlap-v1"
       data-desktop-flow="desklanding-1-2-3"
     >
       <div
@@ -96,12 +96,21 @@ export function BowScreen({ isUnwrapping, onUnwrap, onUnwrapped }: BowScreenProp
       {!flapsOpening && (
         <div className="pointer-events-none absolute inset-0 z-40 overflow-hidden" aria-hidden>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={LANDING} alt="" className="cover-media art-phone" draggable={false} />
+          <img
+            src={LANDING}
+            alt=""
+            className="cover-media art-phone"
+            decoding="sync"
+            fetchPriority="high"
+            draggable={false}
+          />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={LANDING_DESKTOP}
             alt=""
             className="cover-media art-desktop"
+            decoding="sync"
+            fetchPriority="high"
             draggable={false}
           />
         </div>
@@ -129,7 +138,6 @@ export function BowScreen({ isUnwrapping, onUnwrap, onUnwrapped }: BowScreenProp
       >
         {BOW_HINT}
       </p>
-    </div>,
-    document.body
+    </div>
   );
 }
