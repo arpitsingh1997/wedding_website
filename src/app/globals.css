@@ -241,13 +241,6 @@ html.is-phone video.art-phone {
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
   }
-
-  /* Celebrating Together — skip GPU layer that softens text-heavy art */
-  .cover-media.celebrating-cover {
-    transform: none;
-    backface-visibility: visible;
-    -webkit-backface-visibility: visible;
-  }
 }
 
 /*

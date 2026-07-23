@@ -1,4 +1,4 @@
-/** Shared helpers for muted looping overlay videos (invite + celebrating bells). */
+/** Shared helpers for muted looping overlay videos (invite bells). */
 
 export function armMutedLoopVideo(el: HTMLVideoElement) {
   el.muted = true;
@@ -21,13 +21,6 @@ export function playMutedLoopVideo(el: HTMLVideoElement | null) {
 export function kickInviteVideoPlayback() {
   document
     .querySelectorAll('video[data-page="landing2-video"]')
-    .forEach((node) => playMutedLoopVideo(node as HTMLVideoElement));
-}
-
-/** Start Celebrating Together bells (call from the nav tap — iPhone gesture). */
-export function kickCelebratingBellsPlayback() {
-  document
-    .querySelectorAll('video[data-page="celebrating-together-bells"]')
     .forEach((node) => playMutedLoopVideo(node as HTMLVideoElement));
 }
 
