@@ -204,6 +204,12 @@ export function PostRevealNav({
   const onPointerUp = (item: NavItem, e: PointerEvent<HTMLAnchorElement>) => {
     if (!item.id || activeId.current !== item.id) return;
     e.preventDefault();
+    // Instagram: open immediately (other destinations already prep on press-start)
+    if (item.id === "more-of-us") {
+      clearHoldTimer();
+      finishNavigate(item.id);
+      return;
+    }
     scheduleNavigate(item.id);
   };
 
