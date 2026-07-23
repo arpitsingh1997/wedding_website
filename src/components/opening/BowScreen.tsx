@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { startBowChime, stopBowChime } from "./bow-chime";
 import { LANDING, LANDING_DESKTOP } from "./landing-assets";
 import { LandingArt } from "./LandingArt";
 import { kickInviteVideoPlayback } from "./invite-video";
@@ -30,10 +29,6 @@ export function BowScreen({ isUnwrapping, onUnwrap, onUnwrapped }: BowScreenProp
   const finished = useRef(false);
 
   useEffect(() => {
-    return () => stopBowChime(true);
-  }, []);
-
-  useEffect(() => {
     if (!isUnwrapping) {
       setFlapsOpening(false);
       return;
@@ -46,7 +41,6 @@ export function BowScreen({ isUnwrapping, onUnwrap, onUnwrapped }: BowScreenProp
     if (!isUnwrapping || finished.current) return;
     const id = window.setTimeout(() => {
       finished.current = true;
-      // Chime self-ends after its airy reverb — don't cut it with the bow
       onUnwrapped();
     }, TOTAL_MS);
     return () => window.clearTimeout(id);
@@ -55,7 +49,6 @@ export function BowScreen({ isUnwrapping, onUnwrap, onUnwrapped }: BowScreenProp
   const handleTap = useCallback(() => {
     if (advanced.current || isUnwrapping) return;
     advanced.current = true;
-    startBowChime();
     // Same tap unlocks muted invite bells (phone + desktop)
     kickInviteVideoPlayback();
     onUnwrap();

@@ -19,7 +19,7 @@ export const LANDING2A_DESKTOP_VIDEO = `/images/desklanding2a@2x.mp4?desklanding
 export const LANDING3_SCROLL = `/images/landing3@2x.png?${BUILD}`;
 
 /** Scroll-down page — desktop countdown + nav (desklanding3@2x.png) */
-export const LANDING3_DESKTOP = `/images/desklanding3@2x.png?${BUILD}`;
+export const LANDING3_DESKTOP = `/images/desklanding3@2x.png?desklanding3-20260723c`;
 
 /** Our Story — Mac: single seamless scroll (Desktop “our story/desktop.png”) */
 export const OUR_STORY_DESKTOP = `/images/our-story-scroll/desktop.png?${BUILD}`;
