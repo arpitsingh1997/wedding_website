@@ -24,6 +24,13 @@ export function kickInviteVideoPlayback() {
     .forEach((node) => playMutedLoopVideo(node as HTMLVideoElement));
 }
 
+/** Start Celebrating Together bells (call from the nav tap — iPhone gesture). */
+export function kickCelebratingBellsPlayback() {
+  document
+    .querySelectorAll('video[data-page="celebrating-together-bells"]')
+    .forEach((node) => playMutedLoopVideo(node as HTMLVideoElement));
+}
+
 /**
  * Start Save the Date with sound inside the nav tap gesture (iPhone).
  * Must run in the same turn as flushSync mount — play() after await is blocked.

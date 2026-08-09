@@ -50,6 +50,13 @@ const MOBILE_NAV_ITEMS = [
     ...MOBILE_BTN,
   },
   {
+    label: "Celebrating Together",
+    href: "#",
+    id: "celebrating-together" as const,
+    top: "63.91%",
+    ...MOBILE_BTN,
+  },
+  {
     label: "More of Us",
     href: INSTAGRAM_URL,
     id: "more-of-us" as const,
@@ -62,6 +69,7 @@ const MOBILE_NAV_ITEMS = [
  * Desktop hit boxes — desklanding3@2x.png (1366×768), full printed frames:
  * Row1: Our Story | Events
  * Row2: Save the Date | More of Us (Instagram)
+ * Row3: Celebrating Together (centered)
  */
 const DESKTOP_BTN = {
   width: "16.4%",
@@ -101,11 +109,21 @@ const DESKTOP_NAV_ITEMS = [
     left: "52.2%",
     ...DESKTOP_BTN,
   },
+  {
+    label: "Celebrating Together",
+    href: "#",
+    id: "celebrating-together" as const,
+    top: "58.98%",
+    left: "37.2%",
+    width: "25.5%",
+    height: "6.77%",
+  },
 ] as const;
 
 export type InviteNavDestination =
   | "our-story"
   | "save-the-date"
+  | "celebrating-together"
   | "more-of-us"
   | "events";
 

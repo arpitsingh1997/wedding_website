@@ -12,6 +12,7 @@ import {
 import { useIsDesktop } from "@/lib/use-is-desktop";
 import { flushSync } from "react-dom";
 import { kickOurStoryAudio, preloadOurStoryAudio, stopOurStoryAudio } from "./our-story-audio";
+import { CelebratingTogether } from "./CelebratingTogether";
 import {
   PAGE_FADE_IN_MS,
   PAGE_FADE_OUT_MS,
@@ -26,6 +27,7 @@ import {
 } from "./invite-history";
 import {
   armMutedLoopVideo,
+  kickCelebratingBellsPlayback,
   kickSaveTheDatePlayback,
   playMutedLoopVideo,
 } from "./invite-video";
@@ -34,6 +36,10 @@ import { PAGE_CREAM } from "./page-cream";
 import { PostRevealNav, type InviteNavDestination } from "./PostRevealNav";
 import { SaveTheDateVideo } from "./SaveTheDateVideo";
 import {
+  CELEBRATING_TOGETHER,
+  CELEBRATING_TOGETHER_BELLS,
+  CELEBRATING_TOGETHER_BELLS_DESKTOP,
+  CELEBRATING_TOGETHER_DESKTOP,
   LANDING2_DESKTOP,
   LANDING2_PHONE,
   LANDING2A_DESKTOP_VIDEO,
@@ -103,6 +109,7 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
   const [revealed, setRevealed] = useState(false);
   const [saveTheDateOpen, setSaveTheDateOpen] = useState(false);
   const [ourStoryOpen, setOurStoryOpen] = useState(false);
+  const [celebratingTogetherOpen, setCelebratingTogetherOpen] = useState(false);
   /** Soft fade-in for overlays (invitation page-turn) */
   const [overlayRevealed, setOverlayRevealed] = useState(false);
   /** Fade the invite/scroll surface out while opening a destination */
@@ -131,6 +138,10 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
     scrollPhone.src = LANDING3_SCROLL;
     const scrollDesk = new Image();
     scrollDesk.src = LANDING3_DESKTOP;
+    const celebrating = new Image();
+    celebrating.src = CELEBRATING_TOGETHER;
+    const celebratingDesk = new Image();
+    celebratingDesk.src = CELEBRATING_TOGETHER_DESKTOP;
     // Warm invite bells from the start (same multiply overlay as desktop)
     const inviteBellsPhone = document.createElement("video");
     inviteBellsPhone.muted = true;
@@ -142,6 +153,17 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
     inviteBellsDesk.preload = "auto";
     inviteBellsDesk.playsInline = true;
     inviteBellsDesk.src = LANDING2A_DESKTOP_VIDEO;
+    // Warm Celebrating Together bells so that overlay doesn’t flash soft/white
+    const bells = document.createElement("video");
+    bells.muted = true;
+    bells.preload = "auto";
+    bells.playsInline = true;
+    bells.src = CELEBRATING_TOGETHER_BELLS;
+    const deskBells = document.createElement("video");
+    deskBells.muted = true;
+    deskBells.preload = "auto";
+    deskBells.playsInline = true;
+    deskBells.src = CELEBRATING_TOGETHER_BELLS_DESKTOP;
     // Warm Our Story clip so tap → sound is immediate
     preloadOurStoryAudio();
     // Warm Save the Date so the overlay can play on first tap
@@ -216,6 +238,7 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
     stopOurStoryAudio();
     setOurStoryOpen(false);
     setSaveTheDateOpen(false);
+    setCelebratingTogetherOpen(false);
     setOverlayRevealed(false);
   }, []);
 
@@ -233,6 +256,7 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
       kickOurStoryAudio();
       flushSync(() => {
         setSaveTheDateOpen(false);
+        setCelebratingTogetherOpen(false);
         setOverlayRevealed(false);
         setOurStoryOpen(true);
       });
@@ -242,11 +266,23 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
     if (id === "save-the-date") {
       flushSync(() => {
         setOurStoryOpen(false);
+        setCelebratingTogetherOpen(false);
         setOverlayRevealed(false);
         setSaveTheDateOpen(true);
       });
       // Same tap unlocks unmuted autoplay on iPhone
       kickSaveTheDatePlayback();
+      return;
+    }
+
+    if (id === "celebrating-together") {
+      flushSync(() => {
+        setOurStoryOpen(false);
+        setSaveTheDateOpen(false);
+        setOverlayRevealed(false);
+        setCelebratingTogetherOpen(true);
+      });
+      kickCelebratingBellsPlayback();
     }
   }, []);
 
@@ -269,7 +305,11 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
   /** After press hold — fade home out, fade destination in */
   const onNavNavigate = useCallback(async (id: InviteNavDestination) => {
     if (id === "more-of-us" || id === "events") return;
-    if (id !== "our-story" && id !== "save-the-date") {
+    if (
+      id !== "our-story" &&
+      id !== "save-the-date" &&
+      id !== "celebrating-together"
+    ) {
       return;
     }
     if (navBusy.current) return;
@@ -337,12 +377,12 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
   );
 
   useEffect(() => {
-    if (!ourStoryOpen && !saveTheDateOpen) return;
+    if (!ourStoryOpen && !saveTheDateOpen && !celebratingTogetherOpen) return;
     document.documentElement.classList.add("is-scroll-locked");
     return () => {
       document.documentElement.classList.remove("is-scroll-locked");
     };
-  }, [ourStoryOpen, saveTheDateOpen]);
+  }, [ourStoryOpen, saveTheDateOpen, celebratingTogetherOpen]);
 
   return (
     <>
@@ -449,6 +489,11 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
       />
       <SaveTheDateVideo
         open={saveTheDateOpen}
+        revealed={overlayRevealed}
+        onClose={closeViaBack}
+      />
+      <CelebratingTogether
+        open={celebratingTogetherOpen}
         revealed={overlayRevealed}
         onClose={closeViaBack}
       />
