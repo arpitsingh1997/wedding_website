@@ -22,7 +22,7 @@ export const LANDING3_SCROLL = `/images/landing3@2x.png?${BUILD}`;
 export const LANDING3_DESKTOP = `/images/desklanding3@2x.png?desklanding3-20260723c`;
 
 /** Celebrating Together — phone artwork (Desktop celebrating together@2x.png) */
-export const CELEBRATING_TOGETHER = `/images/celebrating-together@2x.png?celebrating-20260809a`;
+export const CELEBRATING_TOGETHER = `/images/celebrating-together@2x.png?celebrating-20260821a`;
 
 /** Celebrating Together — desktop artwork (desk celebrating together) */
 export const CELEBRATING_TOGETHER_DESKTOP = `/images/celebrating-together-desktop.png?celebrating-desk-20260809b`;
@@ -41,8 +41,8 @@ export const OUR_STORY_SCROLL_PAGES = [
   `/images/our-story-scroll/page-1.png?our-story-mobile-20260809c`,
   `/images/our-story-scroll/page-2.png?our-story-mobile-20260809c`,
   `/images/our-story-scroll/page-3.png?our-story-mobile-20260809c`,
-  `/images/our-story-scroll/page-4.png?our-story-mobile-20260809c`,
-  `/images/our-story-scroll/page-5.png?our-story-mobile-20260809c`,
+  `/images/our-story-scroll/page-4.png?our-story-mobile-20260814a`,
+  `/images/our-story-scroll/page-5.png?our-story-mobile-20260814a`,
 ] as const;
 
 /** Our Story — phone HTML rebuild: photos extracted from panel artwork */

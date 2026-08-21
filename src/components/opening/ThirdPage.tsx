@@ -12,6 +12,7 @@ import {
 import { useIsDesktop } from "@/lib/use-is-desktop";
 import { flushSync } from "react-dom";
 import { kickOurStoryAudio, preloadOurStoryAudio, stopOurStoryAudio } from "./our-story-audio";
+import { preloadSaveTheDateAudio, stopSaveTheDateAudio } from "./save-the-date-audio";
 import { CelebratingTogether } from "./CelebratingTogether";
 import {
   PAGE_FADE_IN_MS,
@@ -166,10 +167,12 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
     deskBells.src = CELEBRATING_TOGETHER_BELLS_DESKTOP;
     // Warm Our Story clip so tap → sound is immediate
     preloadOurStoryAudio();
+    preloadSaveTheDateAudio();
     // Warm Save the Date so the overlay can play on first tap
     const saveTheDate = document.createElement("video");
     saveTheDate.preload = "auto";
     saveTheDate.playsInline = true;
+    saveTheDate.muted = true;
     saveTheDate.src = SAVE_THE_DATE_VIDEO;
   }, []);
 
@@ -236,6 +239,7 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
 
   const closeAllOverlays = useCallback(() => {
     stopOurStoryAudio();
+    stopSaveTheDateAudio();
     setOurStoryOpen(false);
     setSaveTheDateOpen(false);
     setCelebratingTogetherOpen(false);

@@ -2,6 +2,10 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import {
+  kickSaveTheDateAudio,
+  stopSaveTheDateAudio,
+} from "./save-the-date-audio";
 import { useInviteOverlayFade } from "./use-invite-overlay-fade";
 import { SAVE_THE_DATE_VIDEO } from "./welcome-assets";
 
@@ -45,17 +49,18 @@ export function SaveTheDateVideo({
     }, CONTROLS_VISIBLE_MS);
   }, [clearHideTimer]);
 
-  /** Keep trying play while open — iPhone often needs more than one attempt. */
+  /** Video is muted — soundtrack plays via Web Audio GainNode. */
   const ensurePlaying = useCallback(() => {
     if (!open) return;
     const el = videoRef.current;
     if (!el) return;
-    el.muted = false;
-    el.defaultMuted = false;
+    el.muted = true;
+    el.defaultMuted = true;
+    el.volume = 0;
     el.playsInline = true;
+    el.setAttribute("muted", "");
     el.setAttribute("playsinline", "");
     el.setAttribute("webkit-playsinline", "");
-    // Never let playback helpers turn controls on
     if (!controlsWereRevealed.current) {
       el.controls = false;
     }
@@ -64,12 +69,12 @@ export function SaveTheDateVideo({
     }
   }, [open]);
 
-  // Open / close only — never re-run when controls toggle
   useEffect(() => {
     if (!open) {
       clearHideTimer();
       setShowControls(false);
       controlsWereRevealed.current = false;
+      stopSaveTheDateAudio();
       const el = videoRef.current;
       if (el) {
         el.controls = false;
@@ -88,16 +93,17 @@ export function SaveTheDateVideo({
     controlsWereRevealed.current = false;
     ignoreTapUntil.current = performance.now() + OPEN_GESTURE_GUARD_MS;
     ensurePlaying();
+    kickSaveTheDateAudio();
 
     return () => {
       clearHideTimer();
       document.documentElement.classList.remove("is-scroll-locked");
+      // Don't stop audio here — Strict Mode remount would silence it.
       videoRef.current?.pause();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally only when `open` changes
   }, [open]);
 
-  /** After the user has shown controls, keep the 10s window alive while they use them */
   const bumpControlsTimer = useCallback(() => {
     if (!controlsWereRevealed.current) return;
     setShowControls(true);
@@ -106,7 +112,6 @@ export function SaveTheDateVideo({
     scheduleHideControls();
   }, [scheduleHideControls]);
 
-  /** First intentional tap on the video — only then show controls */
   const onVideoTap = useCallback(() => {
     if (performance.now() < ignoreTapUntil.current) return;
     controlsWereRevealed.current = true;
@@ -137,6 +142,7 @@ export function SaveTheDateVideo({
       </button>
 
       <video
+        key="save-the-date-muted-web-audio"
         ref={videoRef}
         src={SAVE_THE_DATE_VIDEO}
         className="max-h-[82vh] max-h-[82dvh] w-full max-w-4xl rounded-sm object-contain"
@@ -144,6 +150,7 @@ export function SaveTheDateVideo({
         controlsList="nodownload noremoteplayback"
         disablePictureInPicture
         playsInline
+        muted
         preload="auto"
         onLoadedData={ensurePlaying}
         onCanPlay={ensurePlaying}
@@ -153,7 +160,6 @@ export function SaveTheDateVideo({
         onPlay={bumpControlsTimer}
         onPause={bumpControlsTimer}
         onSeeking={bumpControlsTimer}
-        onVolumeChange={bumpControlsTimer}
         data-video="save-the-date"
       />
     </div>,

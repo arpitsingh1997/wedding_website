@@ -34,14 +34,16 @@ export function OurStoryScroll({
   useEffect(() => {
     if (!open) {
       stopOurStoryAudio();
+      document.documentElement.classList.remove("is-scroll-locked");
       return;
     }
     document.documentElement.classList.add("is-scroll-locked");
     const panel = document.getElementById("our-story");
     panel?.scrollTo(0, 0);
     kickOurStoryAudio();
+    // Do NOT stop audio in cleanup — React Strict Mode remount would kill it
+    // right after the tap gesture, leaving silence on iPhone.
     return () => {
-      stopOurStoryAudio();
       document.documentElement.classList.remove("is-scroll-locked");
     };
   }, [open]);

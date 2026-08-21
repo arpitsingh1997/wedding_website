@@ -1,44 +1,117 @@
-/** Soft background clip for Our Story — pre-trimmed 2:21.5 → 3:15 (plays from t=0) */
-export const OUR_STORY_AUDIO_VOLUME = 0.06;
+/** Soft background clip for Our Story — AudioBuffer + GainNode (works on iPhone). */
 
-/** Trimmed from Desktop “our story/You are in love.mp4” — no seek delay on tap */
-export const OUR_STORY_AUDIO = "/media/youre-in-love-clip.m4a";
+import { getInviteAudioContext, resumeInviteAudioContext } from "./invite-audio-context";
 
-let sharedAudio: HTMLAudioElement | null = null;
-let endListenerAttached = false;
-let lifecycleAttached = false;
-/** True while the Our Story overlay is open */
+export const OUR_STORY_AUDIO_VOLUME = 0.2;
+export const OUR_STORY_AUDIO = "/media/youre-in-love-clip.m4a?v=story-buf-20260821c";
+
+let decodedBuffer: AudioBuffer | null = null;
+let decodePromise: Promise<AudioBuffer> | null = null;
+let activeSource: AudioBufferSourceNode | null = null;
+let activeGain: GainNode | null = null;
 let storySessionActive = false;
-/** Paused because the screen/tab hid — resume when visible again */
 let pausedForBackground = false;
 let resumeAtSec = 0;
+let startedAtCtxTime = 0;
+let offsetWhenStarted = 0;
+let lifecycleAttached = false;
 
-function loopClipToStart() {
-  if (!sharedAudio || !storySessionActive) return;
-  sharedAudio.currentTime = 0;
-  void sharedAudio.play().catch(() => {});
+function loadBuffer(ctx: AudioContext): Promise<AudioBuffer> {
+  if (decodedBuffer) return Promise.resolve(decodedBuffer);
+  if (!decodePromise) {
+    decodePromise = fetch(OUR_STORY_AUDIO)
+      .then((res) => {
+        if (!res.ok) throw new Error("our story audio failed to load");
+        return res.arrayBuffer();
+      })
+      .then((data) => ctx.decodeAudioData(data.slice(0)))
+      .then((buffer) => {
+        decodedBuffer = buffer;
+        return buffer;
+      })
+      .catch((err) => {
+        decodePromise = null;
+        throw err;
+      });
+  }
+  return decodePromise;
 }
 
-function onEnded() {
-  if (!storySessionActive) return;
-  loopClipToStart();
-}
-
-function onTimeUpdate() {
-  if (!sharedAudio || !storySessionActive) return;
-  // Near end — loop (covers browsers that don't fire `ended` reliably)
-  const duration = sharedAudio.duration;
-  if (Number.isFinite(duration) && duration > 0 && sharedAudio.currentTime >= duration - 0.08) {
-    loopClipToStart();
+function disconnectGraph(source: AudioBufferSourceNode | null, gain: GainNode | null) {
+  try {
+    source?.disconnect();
+  } catch {
+    // already disconnected
+  }
+  try {
+    gain?.disconnect();
+  } catch {
+    // already disconnected
   }
 }
 
+function stopSourceImmediate() {
+  const source = activeSource;
+  const gain = activeGain;
+  activeSource = null;
+  activeGain = null;
+  if (!source) {
+    disconnectGraph(source, gain);
+    return;
+  }
+  try {
+    source.onended = null;
+    source.stop();
+  } catch {
+    // already stopped
+  }
+  disconnectGraph(source, gain);
+}
+
+function currentPlaybackOffset(): number {
+  const ctx = getInviteAudioContext();
+  if (!decodedBuffer || !activeSource) return resumeAtSec;
+  const elapsed = Math.max(0, ctx.currentTime - startedAtCtxTime);
+  return (offsetWhenStarted + elapsed) % decodedBuffer.duration;
+}
+
+function playBuffer(buffer: AudioBuffer, offsetSec = 0) {
+  if (!storySessionActive) return;
+
+  const ctx = getInviteAudioContext();
+  stopSourceImmediate();
+
+  const gain = ctx.createGain();
+  gain.gain.value = OUR_STORY_AUDIO_VOLUME;
+  gain.connect(ctx.destination);
+
+  const source = ctx.createBufferSource();
+  source.buffer = buffer;
+  source.loop = true;
+  source.connect(gain);
+
+  const safeOffset = Math.max(0, Math.min(offsetSec, Math.max(0, buffer.duration - 0.05)));
+  startedAtCtxTime = ctx.currentTime;
+  offsetWhenStarted = safeOffset;
+
+  source.onended = () => {
+    if (activeSource === source) {
+      activeSource = null;
+      activeGain = null;
+    }
+    disconnectGraph(source, gain);
+  };
+
+  activeSource = source;
+  activeGain = gain;
+  source.start(0, safeOffset);
+}
+
 function pauseForBackground() {
-  if (!storySessionActive || !sharedAudio) return;
-  if (sharedAudio.paused && !pausedForBackground) return;
-  resumeAtSec = sharedAudio.currentTime;
-  sharedAudio.pause();
+  if (!storySessionActive || !activeSource) return;
+  resumeAtSec = currentPlaybackOffset();
   pausedForBackground = true;
+  stopSourceImmediate();
 }
 
 function resumeFromBackground() {
@@ -47,10 +120,10 @@ function resumeFromBackground() {
     return;
   }
   pausedForBackground = false;
-  const audio = getOurStoryAudio();
-  audio.volume = OUR_STORY_AUDIO_VOLUME;
-  audio.currentTime = Math.max(0, resumeAtSec);
-  void audio.play().catch(() => {});
+  void resumeInviteAudioContext().then(() => {
+    if (!decodedBuffer || !storySessionActive) return;
+    playBuffer(decodedBuffer, resumeAtSec);
+  });
 }
 
 function onLifecycleHide() {
@@ -73,32 +146,14 @@ function attachLifecycleListeners() {
   lifecycleAttached = true;
 }
 
-function getOurStoryAudio(): HTMLAudioElement {
-  if (!sharedAudio) {
-    sharedAudio = new Audio(OUR_STORY_AUDIO);
-    sharedAudio.preload = "auto";
-    sharedAudio.loop = false;
-    sharedAudio.volume = OUR_STORY_AUDIO_VOLUME;
-  }
-  if (!endListenerAttached) {
-    sharedAudio.addEventListener("timeupdate", onTimeUpdate);
-    sharedAudio.addEventListener("ended", onEnded);
-    endListenerAttached = true;
-  }
-  attachLifecycleListeners();
-  return sharedAudio;
-}
-
 /** Warm decode so the first Our Story tap plays instantly */
 export function preloadOurStoryAudio() {
   if (typeof window === "undefined") return;
-  const audio = getOurStoryAudio();
-  audio.preload = "auto";
-  // Kick network + decode without audible playback
+  attachLifecycleListeners();
   try {
-    audio.load();
+    void loadBuffer(getInviteAudioContext());
   } catch {
-    /* ignore */
+    // ignore
   }
 }
 
@@ -108,13 +163,26 @@ export function kickOurStoryAudio() {
   storySessionActive = true;
   pausedForBackground = false;
   resumeAtSec = 0;
-  const audio = getOurStoryAudio();
-  audio.volume = OUR_STORY_AUDIO_VOLUME;
-  // Clip already starts at the soft section — no seek wait
-  if (audio.currentTime > 0.05) {
-    audio.currentTime = 0;
+  attachLifecycleListeners();
+
+  void resumeInviteAudioContext();
+
+  if (decodedBuffer) {
+    playBuffer(decodedBuffer, 0);
+    return;
   }
-  void audio.play().catch(() => {});
+
+  const ctx = getInviteAudioContext();
+  void loadBuffer(ctx)
+    .then((buffer) => {
+      if (!storySessionActive) return;
+      void resumeInviteAudioContext().then(() => {
+        playBuffer(buffer, 0);
+      });
+    })
+    .catch(() => {
+      // ignore decode errors
+    });
 }
 
 /** Close Our Story — stop and do not resume on unlock */
@@ -122,7 +190,5 @@ export function stopOurStoryAudio() {
   storySessionActive = false;
   pausedForBackground = false;
   resumeAtSec = 0;
-  if (!sharedAudio) return;
-  sharedAudio.pause();
-  sharedAudio.currentTime = 0;
+  stopSourceImmediate();
 }
