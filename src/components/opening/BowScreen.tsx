@@ -1,6 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  preloadBowOpeningSound,
+  startBowOpeningSound,
+} from "./bow-opening-sound";
 import { LANDING, LANDING_DESKTOP } from "./landing-assets";
 import { LandingArt } from "./LandingArt";
 import { kickInviteVideoPlayback } from "./invite-video";
@@ -29,6 +33,10 @@ export function BowScreen({ isUnwrapping, onUnwrap, onUnwrapped }: BowScreenProp
   const finished = useRef(false);
 
   useEffect(() => {
+    preloadBowOpeningSound();
+  }, []);
+
+  useEffect(() => {
     if (!isUnwrapping) {
       setFlapsOpening(false);
       return;
@@ -49,7 +57,8 @@ export function BowScreen({ isUnwrapping, onUnwrap, onUnwrapped }: BowScreenProp
   const handleTap = useCallback(() => {
     if (advanced.current || isUnwrapping) return;
     advanced.current = true;
-    // Same tap unlocks muted invite bells (phone + desktop)
+    // Same tap: shimmer + muted invite bells (iPhone gesture window)
+    startBowOpeningSound();
     kickInviteVideoPlayback();
     onUnwrap();
   }, [isUnwrapping, onUnwrap]);
