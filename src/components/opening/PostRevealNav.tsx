@@ -186,8 +186,6 @@ export function PostRevealNav({
         openInstagramProfile("dharmiandarpit");
         return;
       }
-      // Events page not ready yet — still accepts the full-button press
-      if (id === "events") return;
       onNavigate?.(id);
     },
     [navigationLocked, onNavigate]

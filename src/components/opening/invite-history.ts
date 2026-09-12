@@ -6,6 +6,7 @@ export type InviteHistoryStep =
   | "scroll"
   | "our-story"
   | "save-the-date"
+  | "events"
   | "celebrating-together";
 
 const MARKER = "wedding-invite-v1";
@@ -46,6 +47,7 @@ export function pushInviteStep(step: InviteHistoryStep) {
 export type InviteDestinationStep =
   | "our-story"
   | "save-the-date"
+  | "events"
   | "celebrating-together";
 
 export function isDestinationStep(
@@ -54,6 +56,7 @@ export function isDestinationStep(
   return (
     step === "our-story" ||
     step === "save-the-date" ||
+    step === "events" ||
     step === "celebrating-together"
   );
 }

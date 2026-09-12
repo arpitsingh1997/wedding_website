@@ -36,6 +36,7 @@ import { OurStoryScroll } from "./OurStoryScroll";
 import { PAGE_CREAM } from "./page-cream";
 import { PostRevealNav, type InviteNavDestination } from "./PostRevealNav";
 import { SaveTheDateVideo } from "./SaveTheDateVideo";
+import { WeddingEvents } from "./WeddingEvents";
 import {
   CELEBRATING_TOGETHER,
   CELEBRATING_TOGETHER_BELLS,
@@ -110,6 +111,7 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
   const [revealed, setRevealed] = useState(false);
   const [saveTheDateOpen, setSaveTheDateOpen] = useState(false);
   const [ourStoryOpen, setOurStoryOpen] = useState(false);
+  const [weddingEventsOpen, setWeddingEventsOpen] = useState(false);
   const [celebratingTogetherOpen, setCelebratingTogetherOpen] = useState(false);
   /** Soft fade-in for overlays (invitation page-turn) */
   const [overlayRevealed, setOverlayRevealed] = useState(false);
@@ -242,6 +244,7 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
     stopSaveTheDateAudio();
     setOurStoryOpen(false);
     setSaveTheDateOpen(false);
+    setWeddingEventsOpen(false);
     setCelebratingTogetherOpen(false);
     setOverlayRevealed(false);
   }, []);
@@ -260,6 +263,7 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
       kickOurStoryAudio();
       flushSync(() => {
         setSaveTheDateOpen(false);
+        setWeddingEventsOpen(false);
         setCelebratingTogetherOpen(false);
         setOverlayRevealed(false);
         setOurStoryOpen(true);
@@ -270,6 +274,7 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
     if (id === "save-the-date") {
       flushSync(() => {
         setOurStoryOpen(false);
+        setWeddingEventsOpen(false);
         setCelebratingTogetherOpen(false);
         setOverlayRevealed(false);
         setSaveTheDateOpen(true);
@@ -279,10 +284,22 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
       return;
     }
 
+    if (id === "events") {
+      flushSync(() => {
+        setOurStoryOpen(false);
+        setSaveTheDateOpen(false);
+        setCelebratingTogetherOpen(false);
+        setOverlayRevealed(false);
+        setWeddingEventsOpen(true);
+      });
+      return;
+    }
+
     if (id === "celebrating-together") {
       flushSync(() => {
         setOurStoryOpen(false);
         setSaveTheDateOpen(false);
+        setWeddingEventsOpen(false);
         setOverlayRevealed(false);
         setCelebratingTogetherOpen(true);
       });
@@ -294,7 +311,7 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
   const onNavPressStart = useCallback(
     (id: InviteNavDestination) => {
       if (navBusy.current || navigationLocked) return;
-      if (id === "more-of-us" || id === "events") return;
+      if (id === "more-of-us") return;
       openDestination(id);
     },
     [navigationLocked, openDestination]
@@ -308,10 +325,11 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
 
   /** After press hold — fade home out, fade destination in */
   const onNavNavigate = useCallback(async (id: InviteNavDestination) => {
-    if (id === "more-of-us" || id === "events") return;
+    if (id === "more-of-us") return;
     if (
       id !== "our-story" &&
       id !== "save-the-date" &&
+      id !== "events" &&
       id !== "celebrating-together"
     ) {
       return;
@@ -381,12 +399,24 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
   );
 
   useEffect(() => {
-    if (!ourStoryOpen && !saveTheDateOpen && !celebratingTogetherOpen) return;
+    if (
+      !ourStoryOpen &&
+      !saveTheDateOpen &&
+      !weddingEventsOpen &&
+      !celebratingTogetherOpen
+    ) {
+      return;
+    }
     document.documentElement.classList.add("is-scroll-locked");
     return () => {
       document.documentElement.classList.remove("is-scroll-locked");
     };
-  }, [ourStoryOpen, saveTheDateOpen, celebratingTogetherOpen]);
+  }, [
+    ourStoryOpen,
+    saveTheDateOpen,
+    weddingEventsOpen,
+    celebratingTogetherOpen,
+  ]);
 
   return (
     <>
@@ -493,6 +523,11 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
       />
       <SaveTheDateVideo
         open={saveTheDateOpen}
+        revealed={overlayRevealed}
+        onClose={closeViaBack}
+      />
+      <WeddingEvents
+        open={weddingEventsOpen}
         revealed={overlayRevealed}
         onClose={closeViaBack}
       />
