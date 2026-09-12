@@ -29,7 +29,7 @@ const LE_MERIDIEN_JAIPUR = {
 /** Ordered to match the Wedding Events gallery pages. All times are IST. */
 export const WEDDING_CALENDAR_EVENTS: readonly WeddingCalendarEvent[] = [
   {
-    uid: "haldi-2027-01-25-v4@dharmiandarpit",
+    uid: "haldi-2027-01-25-v5@dharmiandarpit",
     title: "Haldi — Dharmi & Arpit",
     venue: "Poolside",
     description:
@@ -38,7 +38,7 @@ export const WEDDING_CALENDAR_EVENTS: readonly WeddingCalendarEvent[] = [
     end: "20270125T160000",
   },
   {
-    uid: "sangeet-2027-01-25-v4@dharmiandarpit",
+    uid: "sangeet-2027-01-25-v5@dharmiandarpit",
     title: "Sangeet — Dharmi & Arpit",
     venue: "Amer Ballroom",
     description:
@@ -47,25 +47,25 @@ export const WEDDING_CALENDAR_EVENTS: readonly WeddingCalendarEvent[] = [
     end: "20270126T003000",
   },
   {
-    uid: "mameru-2027-01-26-v4@dharmiandarpit",
+    uid: "mameru-2027-01-26-v5@dharmiandarpit",
     title: "Mameru — Dharmi & Arpit",
-    venue: "Aravalli Lawn",
+    venue: "Poolside",
     description:
-      "Wrapped in blessings — Mameru, 10 am onwards (India Standard Time).",
-    start: "20270126T100000",
+      "Wrapped in blessings — Mameru, 10:30 am onwards (India Standard Time).",
+    start: "20270126T103000",
     end: "20270126T130000",
   },
   {
-    uid: "wedding-2027-01-26-v4@dharmiandarpit",
+    uid: "wedding-2027-01-26-v5@dharmiandarpit",
     title: "The Big Day — Dharmi & Arpit",
     venue: "Amer Lawn",
     description:
-      "Woven in vows — Saafa Bandhi 2 pm, Baraat 4 pm, Baraat Swagat 5:30 pm, Varmala 6 pm, Pheras 7 pm onwards (India Standard Time).",
-    start: "20270126T140000",
+      "Woven in vows — Saafa Bandhi 2:30 pm, Baraat 4 pm, Baraat Swagat 5:30 pm, Varmala 6 pm, Pheras 7 pm onwards (India Standard Time).",
+    start: "20270126T143000",
     end: "20270126T220000",
   },
   {
-    uid: "cocktail-2027-01-26-v4@dharmiandarpit",
+    uid: "cocktail-2027-01-26-v5@dharmiandarpit",
     title: "Cocktail — Dharmi & Arpit",
     venue: "Amer Ballroom",
     description:

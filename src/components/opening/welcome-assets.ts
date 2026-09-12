@@ -35,20 +35,20 @@ export const CELEBRATING_TOGETHER_BELLS_DESKTOP = `/images/celebrating-together-
 
 /** Wedding Events — ordered phone panels from Desktop “events” (5→9). */
 export const WEDDING_EVENTS_MOBILE_PAGES = [
-  `/images/events/mobile/page-1.png?events-20260912c`,
-  `/images/events/mobile/page-2.png?events-20260912c`,
-  `/images/events/mobile/page-3.png?events-20260912c`,
-  `/images/events/mobile/page-4.png?events-20260912c`,
-  `/images/events/mobile/page-5.png?events-20260912c`,
+  `/images/events/mobile/page-1.png?events-20260912g`,
+  `/images/events/mobile/page-2.png?events-20260912g`,
+  `/images/events/mobile/page-3.png?events-20260912g`,
+  `/images/events/mobile/page-4.png?events-20260912g`,
+  `/images/events/mobile/page-5.png?events-20260912g`,
 ] as const;
 
-/** Wedding Events — ordered desktop panels from Desktop “Events desktop” (8→12). */
+/** Wedding Events — ordered desktop panels from Desktop “Desktop events” (7→11). */
 export const WEDDING_EVENTS_DESKTOP_PAGES = [
-  `/images/events/desktop/page-1.png?events-20260909a`,
-  `/images/events/desktop/page-2.png?events-20260909a`,
-  `/images/events/desktop/page-3.png?events-20260909a`,
-  `/images/events/desktop/page-4.png?events-20260909a`,
-  `/images/events/desktop/page-5.png?events-20260909a`,
+  `/images/events/desktop/page-1.png?events-20260912f`,
+  `/images/events/desktop/page-2.png?events-20260912f`,
+  `/images/events/desktop/page-3.png?events-20260912f`,
+  `/images/events/desktop/page-4.png?events-20260912f`,
+  `/images/events/desktop/page-5.png?events-20260912f`,
 ] as const;
 
 /** Our Story — Mac: single seamless scroll (Desktop “our story/Desktop (Website).png”) */
