@@ -15,8 +15,8 @@ DTSTART:19700101T000000
 END:STANDARD
 END:VTIMEZONE
 BEGIN:VEVENT
-UID:haldi-2027-01-25-v4@dharmiandarpit
-DTSTAMP:20260912T160534Z
+UID:haldi-2027-01-25-v5@dharmiandarpit
+DTSTAMP:20260912T162757Z
 SEQUENCE:1
 DTSTART:20270125T070000Z
 DTEND:20270125T103000Z
@@ -27,8 +27,8 @@ DESCRIPTION:Venue: Poolside. Where love blossoms — Haldi\, 12:30 pm onwards
   (India Standard Time).
 END:VEVENT
 BEGIN:VEVENT
-UID:sangeet-2027-01-25-v4@dharmiandarpit
-DTSTAMP:20260912T160534Z
+UID:sangeet-2027-01-25-v5@dharmiandarpit
+DTSTAMP:20260912T162757Z
 SEQUENCE:1
 DTSTART:20270125T140000Z
 DTEND:20270125T190000Z
@@ -39,33 +39,33 @@ DESCRIPTION:Venue: Amer Ballroom. Lights. Camera. Dance. — Sangeet\, 7:30 p
  m onwards (India Standard Time).
 END:VEVENT
 BEGIN:VEVENT
-UID:mameru-2027-01-26-v4@dharmiandarpit
-DTSTAMP:20260912T160534Z
+UID:mameru-2027-01-26-v5@dharmiandarpit
+DTSTAMP:20260912T162757Z
 SEQUENCE:1
-DTSTART:20270126T043000Z
+DTSTART:20270126T050000Z
 DTEND:20270126T073000Z
 SUMMARY:Mameru — Dharmi & Arpit
 LOCATION:Le Meridien\, Jaipur
 X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-APPLE-RADIUS=50;X-TITLE=Le Meridien\, Jaipur:geo:27.0320761,75.8885293
-DESCRIPTION:Venue: Aravalli Lawn. Wrapped in blessings — Mameru\, 10 am onw
- ards (India Standard Time).
+DESCRIPTION:Venue: Poolside. Wrapped in blessings — Mameru\, 10:30 am onwar
+ ds (India Standard Time).
 END:VEVENT
 BEGIN:VEVENT
-UID:wedding-2027-01-26-v4@dharmiandarpit
-DTSTAMP:20260912T160534Z
+UID:wedding-2027-01-26-v5@dharmiandarpit
+DTSTAMP:20260912T162757Z
 SEQUENCE:1
-DTSTART:20270126T083000Z
+DTSTART:20270126T090000Z
 DTEND:20270126T163000Z
 SUMMARY:The Big Day — Dharmi & Arpit
 LOCATION:Le Meridien\, Jaipur
 X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-APPLE-RADIUS=50;X-TITLE=Le Meridien\, Jaipur:geo:27.0320761,75.8885293
-DESCRIPTION:Venue: Amer Lawn. Woven in vows — Saafa Bandhi 2 pm\, Baraat 4 
- pm\, Baraat Swagat 5:30 pm\, Varmala 6 pm\, Pheras 7 pm onwards (India Sta
- ndard Time).
+DESCRIPTION:Venue: Amer Lawn. Woven in vows — Saafa Bandhi 2:30 pm\, Baraat
+  4 pm\, Baraat Swagat 5:30 pm\, Varmala 6 pm\, Pheras 7 pm onwards (India 
+ Standard Time).
 END:VEVENT
 BEGIN:VEVENT
-UID:cocktail-2027-01-26-v4@dharmiandarpit
-DTSTAMP:20260912T160534Z
+UID:cocktail-2027-01-26-v5@dharmiandarpit
+DTSTAMP:20260912T162757Z
 SEQUENCE:1
 DTSTART:20270126T170000Z
 DTEND:20270126T203000Z
