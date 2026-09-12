@@ -35,11 +35,11 @@ export const CELEBRATING_TOGETHER_BELLS_DESKTOP = `/images/celebrating-together-
 
 /** Wedding Events — ordered phone panels from Desktop “events” (5→9). */
 export const WEDDING_EVENTS_MOBILE_PAGES = [
-  `/images/events/mobile/page-1.png?events-20260912a`,
-  `/images/events/mobile/page-2.png?events-20260912a`,
-  `/images/events/mobile/page-3.png?events-20260912a`,
-  `/images/events/mobile/page-4.png?events-20260912a`,
-  `/images/events/mobile/page-5.png?events-20260912a`,
+  `/images/events/mobile/page-1.png?events-20260912c`,
+  `/images/events/mobile/page-2.png?events-20260912c`,
+  `/images/events/mobile/page-3.png?events-20260912c`,
+  `/images/events/mobile/page-4.png?events-20260912c`,
+  `/images/events/mobile/page-5.png?events-20260912c`,
 ] as const;
 
 /** Wedding Events — ordered desktop panels from Desktop “Events desktop” (8→12). */
