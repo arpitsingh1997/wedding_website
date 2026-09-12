@@ -26,6 +26,14 @@ const nextConfig: NextConfig = {
           { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
         ],
       },
+      {
+        source: "/calendar/:path*.ics",
+        headers: [
+          { key: "Content-Type", value: "text/calendar; charset=utf-8" },
+          // inline so Apple Calendar (webcal://) can read it; downloads use a blob instead
+          { key: "Content-Disposition", value: 'inline; filename="dharmi-arpit-wedding-events.ics"' },
+        ],
+      },
       // HTML/pages only — do not apply to /images (catch-all overrides media cache)
       {
         source: "/",

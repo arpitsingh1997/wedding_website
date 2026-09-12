@@ -8,6 +8,7 @@ import {
   WEDDING_EVENTS_DESKTOP_PAGES,
   WEDDING_EVENTS_MOBILE_PAGES,
 } from "./welcome-assets";
+import { addWeddingEventsToCalendar } from "./wedding-events-calendar";
 
 type WeddingEventsProps = {
   open: boolean;
@@ -91,6 +92,21 @@ export function WeddingEvents({
         aria-label="Close wedding events"
       >
         ×
+      </button>
+
+      <button
+        type="button"
+        onClick={() => addWeddingEventsToCalendar()}
+        className="fixed left-3 z-[100030] rounded-full px-3.5 py-2 font-display text-[11px] font-light tracking-[0.14em] uppercase shadow-md lg:left-5"
+        style={{
+          top: "max(0.75rem, env(safe-area-inset-top))",
+          color: "#5C1A1A",
+          backgroundColor: PAGE_CREAM,
+          WebkitTapHighlightColor: "transparent",
+        }}
+        aria-label="Add wedding events to calendar"
+      >
+        Add to calendar
       </button>
 
       <main className="w-full">
