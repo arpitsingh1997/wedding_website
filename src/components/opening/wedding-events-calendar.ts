@@ -201,15 +201,79 @@ export function buildWeddingEventsIcs(
 
 export const WEDDING_EVENTS_ICS_PATH = "/calendar/wedding-events.ics";
 
+function isAndroidBrowser(): boolean {
+  return /Android/i.test(navigator.userAgent);
+}
+
+function isPrivateHostname(hostname: string): boolean {
+  return (
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    hostname.endsWith(".local") ||
+    /^192\.168\./.test(hostname) ||
+    /^10\./.test(hostname) ||
+    /^172\.(1[6-9]|2\d|3[01])\./.test(hostname)
+  );
+}
+
+/** Force a real .ics download — Android Chrome won’t hand off inline calendar MIME. */
+function downloadWeddingEventsIcsFile() {
+  const ics = buildWeddingEventsIcs();
+  const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = "dharmi-arpit-wedding-events.ics";
+  anchor.rel = "noopener";
+  anchor.style.display = "none";
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+  window.setTimeout(() => URL.revokeObjectURL(url), 2500);
+}
+
+/**
+ * Android: Google Calendar can add a multi-event .ics from a public HTTPS URL.
+ * Local/LAN preview falls back to downloading the file (Google can’t fetch private IPs).
+ */
+function addWeddingEventsOnAndroid() {
+  const absoluteIcs = new URL(WEDDING_EVENTS_ICS_PATH, window.location.origin).href;
+  const canGoogleFetch =
+    window.location.protocol === "https:" &&
+    !isPrivateHostname(window.location.hostname);
+
+  if (canGoogleFetch) {
+    // One-tap: open Google Calendar and offer to add all wedding events
+    const googleUrl =
+      "https://calendar.google.com/calendar/render?cid=" +
+      encodeURIComponent(absoluteIcs);
+    const opened = window.open(googleUrl, "_blank", "noopener,noreferrer");
+    if (!opened) {
+      // Popup blocked — fall back to an .ics download
+      downloadWeddingEventsIcsFile();
+    }
+    return;
+  }
+
+  // LAN / http preview — download so the guest can Open with Calendar
+  downloadWeddingEventsIcsFile();
+}
+
 /**
  * Open Calendar to add events once (METHOD:PUBLISH — not a subscription).
- * Uses a short-lived popup that we close so Chrome doesn’t leave a blank tab.
+ * iPhone: hosted .ics popup (OS Calendar intercepts).
+ * Android: Google Calendar URL (or .ics download on local preview).
  * Times are India Standard Time (Asia/Kolkata, UTC+05:30).
  */
 export function addWeddingEventsToCalendar() {
   if (typeof window === "undefined") return;
 
-  // Hosted .ics with inline calendar MIME — OS Calendar intercepts as “Add events”
+  if (isAndroidBrowser()) {
+    addWeddingEventsOnAndroid();
+    return;
+  }
+
+  // Hosted .ics with inline calendar MIME — iOS Calendar intercepts as “Add events”
   // (not webcal:// subscription). Keep a handle so we can close the leftover tab.
   const icsUrl = `${WEDDING_EVENTS_ICS_PATH}?t=${Date.now()}`;
   const popup = window.open(icsUrl, "wedding-events-calendar");
