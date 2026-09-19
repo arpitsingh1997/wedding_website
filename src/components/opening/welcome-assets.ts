@@ -4,7 +4,7 @@ export const BUILD = "landing2a-20260722f";
 export const LANDING2_PHONE = `/images/landing2@2x.png?landing2-20260809c`;
 
 /** Phone invite — bells overlay (Desktop landing2a@2x.mp4), white plate + multiply */
-export const LANDING2A_VIDEO = `/images/landing2a@2x.mp4?${BUILD}`;
+export const LANDING2A_VIDEO = `/images/landing2a@2x.mp4?landing2a-20260919b`;
 
 /** @deprecated alias */
 export const LANDING2_POSTER = LANDING2_PHONE;
@@ -13,25 +13,19 @@ export const LANDING2_POSTER = LANDING2_PHONE;
 export const LANDING2_DESKTOP = `/images/desklanding2@2x.png?desklanding2-20260809b`;
 
 /** Desktop invite — bells overlay (desklanding2a@2x.mp4), white plate + multiply */
-export const LANDING2A_DESKTOP_VIDEO = `/images/desklanding2a@2x.mp4?desklanding2a-20260722g`;
+export const LANDING2A_DESKTOP_VIDEO = `/images/desklanding2a@2x.mp4?desklanding2a-20260919b`;
 
 /** Scroll-down page — phone countdown + vertical nav artwork */
-export const LANDING3_SCROLL = `/images/landing3@2x.png?${BUILD}`;
+export const LANDING3_SCROLL = `/images/landing3@2x.png?landing3-20260919c`;
 
 /** Scroll-down page — desktop countdown + nav (desklanding3@2x.png) */
-export const LANDING3_DESKTOP = `/images/desklanding3@2x.png?desklanding3-20260723c`;
+export const LANDING3_DESKTOP = `/images/desklanding3@2x.png?desklanding3-20260919b`;
 
-/** Celebrating Together — phone artwork (Desktop celebrating together@2x.png) */
-export const CELEBRATING_TOGETHER = `/images/celebrating-together@2x.png?celebrating-20260821a`;
+/** Celebrating Together scroll section — phone (landing4@2x.png) */
+export const CELEBRATING_TOGETHER = `/images/landing4@2x.png?landing4-20260920a`;
 
-/** Celebrating Together — desktop artwork (desk celebrating together) */
-export const CELEBRATING_TOGETHER_DESKTOP = `/images/celebrating-together-desktop.png?celebrating-desk-20260809b`;
-
-/** Celebrating Together — mobile bells overlay (white plate + multiply) */
-export const CELEBRATING_TOGETHER_BELLS = `/images/celebrating-together-bells@2x.mp4?celebrating-20260802b`;
-
-/** Celebrating Together — desktop bells overlay (desk celebrating bells) */
-export const CELEBRATING_TOGETHER_BELLS_DESKTOP = `/images/celebrating-together-bells-desktop.mp4?celebrating-20260802b`;
+/** Celebrating Together scroll section — desktop (desklanding4@2x.png) */
+export const CELEBRATING_TOGETHER_DESKTOP = `/images/desklanding4@2x.png?desklanding4-20260919a`;
 
 /** Wedding Events — ordered phone panels from Desktop “events” (5→9). */
 export const WEDDING_EVENTS_MOBILE_PAGES = [
@@ -83,6 +77,3 @@ export const OUR_STORY_PHOTOS = {
 
 /** Panel 4 (Arpit & Dharmi) — keep original full artwork for exact font rendering */
 export const OUR_STORY_PANEL4_IMAGE = `/images/our-story-4.png?${BUILD}`;
-
-/** Save the Date nav video — with sound, native controls */
-export const SAVE_THE_DATE_VIDEO = `/images/save-the-date.mp4?${BUILD}`;

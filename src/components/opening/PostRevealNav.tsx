@@ -10,21 +10,26 @@ import {
 } from "react";
 import { useIsDesktop } from "@/lib/use-is-desktop";
 import { PRESS_HOLD_MS } from "./invite-nav-motion";
+import { armMutedLoopVideo, playMutedLoopVideo } from "./invite-video";
 import { openInstagramProfile } from "./open-instagram";
 import { PAGE_CREAM } from "./page-cream";
 import { WeddingCountdown } from "./WeddingCountdown";
-import { LANDING3_DESKTOP, LANDING3_SCROLL } from "./welcome-assets";
+import {
+  LANDING2A_DESKTOP_VIDEO,
+  LANDING2A_VIDEO,
+  LANDING3_DESKTOP,
+  LANDING3_SCROLL,
+} from "./welcome-assets";
 
 const INSTAGRAM_URL = "https://www.instagram.com/dharmiandarpit";
 
 /**
- * Phone hit boxes — exact printed button frames on landing3@2x.png (1080×1920).
- * Same L/W/H as Our Story so every press scales the real border the same way.
+ * Phone hit boxes — landing3@2x.png (1080×1920): Our Story, Wedding Events, More of Us.
  */
 const MOBILE_BTN = {
-  left: "10.2%",
-  width: "79.6%",
-  height: "5.21%",
+  left: "10.3%",
+  width: "79.4%",
+  height: "5.16%",
 } as const;
 
 const MOBILE_NAV_ITEMS = [
@@ -32,98 +37,62 @@ const MOBILE_NAV_ITEMS = [
     label: "Our Story",
     href: "#our-story",
     id: "our-story" as const,
-    top: "40.73%",
-    ...MOBILE_BTN,
-  },
-  {
-    label: "Save the Date",
-    href: "#save-the-date",
-    id: "save-the-date" as const,
-    top: "48.44%",
+    top: "49.01%",
     ...MOBILE_BTN,
   },
   {
     label: "Wedding Events",
     href: "#events",
     id: "events" as const,
-    top: "56.15%",
-    ...MOBILE_BTN,
-  },
-  {
-    label: "Celebrating Together",
-    href: "#",
-    id: "celebrating-together" as const,
-    top: "63.91%",
+    top: "56.88%",
     ...MOBILE_BTN,
   },
   {
     label: "More of Us",
     href: INSTAGRAM_URL,
     id: "more-of-us" as const,
-    top: "71.61%",
+    top: "64.74%",
     ...MOBILE_BTN,
   },
 ] as const;
 
 /**
- * Desktop hit boxes — desklanding3@2x.png (1366×768), full printed frames:
- * Row1: Our Story | Events
- * Row2: Save the Date | More of Us (Instagram)
- * Row3: Celebrating Together (centered)
+ * Desktop hit boxes — desklanding3@2x.png:
+ * Row1: Our Story | Wedding Events
+ * Row2: More of Us (centered)
  */
-const DESKTOP_BTN = {
-  width: "16.4%",
-  height: "6.77%",
-} as const;
-
 const DESKTOP_NAV_ITEMS = [
   {
     label: "Our Story",
     href: "#our-story",
     id: "our-story" as const,
-    top: "41.15%",
-    left: "31.3%",
-    ...DESKTOP_BTN,
+    top: "42.77%",
+    left: "31.4%",
+    width: "16.4%",
+    height: "6.71%",
   },
   {
     label: "Wedding Events",
     href: "#events",
     id: "events" as const,
-    top: "41.15%",
-    left: "52.2%",
-    ...DESKTOP_BTN,
-  },
-  {
-    label: "Save the Date",
-    href: "#save-the-date",
-    id: "save-the-date" as const,
-    top: "50.13%",
-    left: "31.3%",
-    ...DESKTOP_BTN,
+    top: "42.77%",
+    left: "51.0%",
+    width: "17.7%",
+    height: "6.71%",
   },
   {
     label: "More of Us",
     href: INSTAGRAM_URL,
     id: "more-of-us" as const,
-    top: "50.13%",
-    left: "52.2%",
-    ...DESKTOP_BTN,
-  },
-  {
-    label: "Celebrating Together",
-    href: "#",
-    id: "celebrating-together" as const,
-    top: "58.98%",
-    left: "37.2%",
-    width: "25.5%",
-    height: "6.77%",
+    top: "52.60%",
+    left: "41.2%",
+    width: "17.6%",
+    height: "6.71%",
   },
 ] as const;
 
 export type InviteNavDestination =
   | "our-story"
-  | "save-the-date"
-  | "celebrating-together"
   | "more-of-us"
   | "events";
 
@@ -149,6 +118,8 @@ type PostRevealNavProps = {
   onPressCancel?: () => void;
   /** After press hold — begin fade + open destination */
   onNavigate?: (id: InviteNavDestination) => void;
+  /** Tap empty menu area (or scroll) → Celebrating Together */
+  onContinue?: () => void;
 };
 
 export function PostRevealNav({
@@ -156,11 +127,14 @@ export function PostRevealNav({
   onPressStart,
   onPressCancel,
   onNavigate,
+  onContinue,
 }: PostRevealNavProps) {
   const isDesktop = useIsDesktop();
   const artSrc = isDesktop ? LANDING3_DESKTOP : LANDING3_SCROLL;
   const navItems: readonly NavItem[] = isDesktop ? DESKTOP_NAV_ITEMS : MOBILE_NAV_ITEMS;
 
+  const phoneBellsRef = useRef<HTMLVideoElement>(null);
+  const deskBellsRef = useRef<HTMLVideoElement>(null);
   const [pressedId, setPressedId] = useState<string | null>(null);
   const pressStartedAt = useRef(0);
   const activeId = useRef<InviteNavDestination | null>(null);
@@ -175,6 +149,33 @@ export function PostRevealNav({
   }, []);
 
   useEffect(() => () => clearHoldTimer(), [clearHoldTimer]);
+
+  // Same landing2a / desklanding2a bells as the invite — keep muted loop alive
+  useEffect(() => {
+    const phone = phoneBellsRef.current;
+    const desk = deskBellsRef.current;
+    const play = () => {
+      playMutedLoopVideo(phone);
+      playMutedLoopVideo(desk);
+    };
+    if (phone) armMutedLoopVideo(phone);
+    if (desk) armMutedLoopVideo(desk);
+    play();
+
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") play();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    const keepAlive = window.setInterval(() => {
+      if (phone?.paused) playMutedLoopVideo(phone);
+      if (desk?.paused) playMutedLoopVideo(desk);
+    }, 3000);
+
+    return () => {
+      window.clearInterval(keepAlive);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, []);
 
   const finishNavigate = useCallback(
     (id: InviteNavDestination) => {
@@ -261,26 +262,67 @@ export function PostRevealNav({
       data-layout={isDesktop ? "desktop" : "mobile"}
     >
       <div className="relative mx-auto w-full max-w-[540px] md:max-w-none">
-        {/* Phone scroll art */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={LANDING3_SCROLL}
-          alt="Countdown to our forever — Dharmi and Arpit"
-          className="crisp-image art-phone block h-auto w-full max-w-none select-none"
-          decoding="async"
-          fetchPriority="high"
-          draggable={false}
-        />
-        {/* Desktop scroll art — desklanding3@2x */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={LANDING3_DESKTOP}
-          alt="Countdown to our forever — Dharmi and Arpit"
-          className="crisp-image art-desktop block h-auto w-full max-w-none select-none"
-          decoding="async"
-          fetchPriority="high"
-          draggable={false}
-        />
+        {/* Phone menu art + landing2a bells (multiply) */}
+        <div
+          className="relative w-full"
+          style={{ isolation: "isolate", backgroundColor: PAGE_CREAM }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={LANDING3_SCROLL}
+            alt="Countdown to our forever — Dharmi and Arpit"
+            className="crisp-image art-phone block h-auto w-full max-w-none select-none"
+            decoding="async"
+            fetchPriority="high"
+            draggable={false}
+          />
+          <video
+            ref={phoneBellsRef}
+            src={LANDING2A_VIDEO}
+            className="invite-loop-video invite-bells-layer art-phone absolute inset-0 h-full w-full max-w-none object-cover"
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="auto"
+            controls={false}
+            disablePictureInPicture
+            controlsList="nodownload nofullscreen noremoteplayback"
+            aria-hidden
+            data-page="landing3-bells"
+          />
+        </div>
+
+        {/* Desktop menu art + desklanding2a bells (multiply) */}
+        <div
+          className="relative w-full"
+          style={{ isolation: "isolate", backgroundColor: PAGE_CREAM }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={LANDING3_DESKTOP}
+            alt="Countdown to our forever — Dharmi and Arpit"
+            className="crisp-image art-desktop block h-auto w-full max-w-none select-none"
+            decoding="async"
+            fetchPriority="high"
+            draggable={false}
+          />
+          <video
+            ref={deskBellsRef}
+            src={LANDING2A_DESKTOP_VIDEO}
+            className="invite-loop-video invite-bells-layer art-desktop absolute inset-0 h-full w-full max-w-none object-cover"
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="auto"
+            controls={false}
+            disablePictureInPicture
+            controlsList="nodownload nofullscreen noremoteplayback"
+            aria-hidden
+            data-page="landing3-bells"
+          />
+        </div>
 
         <div
           className="pointer-events-none absolute inset-x-0 z-[1] flex justify-center px-5"
@@ -289,10 +331,27 @@ export function PostRevealNav({
           <WeddingCountdown />
         </div>
 
+        {onContinue && !navigationLocked && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              onContinue();
+            }}
+            className="absolute inset-0 z-[1] cursor-pointer border-0 bg-transparent"
+            style={{
+              WebkitTapHighlightColor: "transparent",
+              touchAction: "pan-y",
+            }}
+            aria-label="Continue to celebrating together"
+          />
+        )}
+
         <nav
           className="absolute inset-0 z-[2]"
           aria-label="Main navigation"
-          style={{ pointerEvents: navigationLocked ? "none" : "auto" }}
+          // Let empty taps fall through to the continue button underneath
+          style={{ pointerEvents: "none" }}
         >
           {navItems.map((item) => {
             const isPressed = pressedId === item.id;
@@ -312,6 +371,7 @@ export function PostRevealNav({
                   left: item.left,
                   width: item.width,
                   height: item.height,
+                  pointerEvents: navigationLocked ? "none" : "auto",
                   // Hide the flat art under a pressed clone so borders don’t double
                   ["--page-cream" as string]: PAGE_CREAM,
                 }}
