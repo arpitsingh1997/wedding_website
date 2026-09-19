@@ -12,8 +12,6 @@ import {
 import { useIsDesktop } from "@/lib/use-is-desktop";
 import { flushSync } from "react-dom";
 import { kickOurStoryAudio, preloadOurStoryAudio, stopOurStoryAudio } from "./our-story-audio";
-import { preloadSaveTheDateAudio, stopSaveTheDateAudio } from "./save-the-date-audio";
-import { CelebratingTogether } from "./CelebratingTogether";
 import {
   PAGE_FADE_IN_MS,
   PAGE_FADE_OUT_MS,
@@ -26,21 +24,14 @@ import {
   readInviteStep,
   type InviteHistoryStep,
 } from "./invite-history";
-import {
-  armMutedLoopVideo,
-  kickCelebratingBellsPlayback,
-  kickSaveTheDatePlayback,
-  playMutedLoopVideo,
-} from "./invite-video";
+import { armMutedLoopVideo, playMutedLoopVideo } from "./invite-video";
+import { CelebratingTogetherSection } from "./CelebratingTogetherSection";
 import { OurStoryScroll } from "./OurStoryScroll";
 import { PAGE_CREAM } from "./page-cream";
 import { PostRevealNav, type InviteNavDestination } from "./PostRevealNav";
-import { SaveTheDateVideo } from "./SaveTheDateVideo";
 import { WeddingEvents } from "./WeddingEvents";
 import {
   CELEBRATING_TOGETHER,
-  CELEBRATING_TOGETHER_BELLS,
-  CELEBRATING_TOGETHER_BELLS_DESKTOP,
   CELEBRATING_TOGETHER_DESKTOP,
   LANDING2_DESKTOP,
   LANDING2_PHONE,
@@ -48,7 +39,6 @@ import {
   LANDING2A_VIDEO,
   LANDING3_DESKTOP,
   LANDING3_SCROLL,
-  SAVE_THE_DATE_VIDEO,
 } from "./welcome-assets";
 
 type ThirdPageProps = {
@@ -100,7 +90,9 @@ function useLoopingInviteVideo(
   }, [ref, enabled]);
 }
 
-const AUTO_SCROLL_DELAY_MS = 30_000;
+const AUTO_SCROLL_DELAY_MS = 20_000;
+/** Idle on the menu page → ease down to Celebrating Together */
+const MENU_TO_CELEBRATING_DELAY_MS = 20_000;
 
 /** Invitation page — phone PNG + video layer / desktop art, then countdown + nav */
 export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
@@ -109,10 +101,8 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
     ref
   ) {
   const [revealed, setRevealed] = useState(false);
-  const [saveTheDateOpen, setSaveTheDateOpen] = useState(false);
   const [ourStoryOpen, setOurStoryOpen] = useState(false);
   const [weddingEventsOpen, setWeddingEventsOpen] = useState(false);
-  const [celebratingTogetherOpen, setCelebratingTogetherOpen] = useState(false);
   /** Soft fade-in for overlays (invitation page-turn) */
   const [overlayRevealed, setOverlayRevealed] = useState(false);
   /** Fade the invite/scroll surface out while opening a destination */
@@ -156,26 +146,19 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
     inviteBellsDesk.preload = "auto";
     inviteBellsDesk.playsInline = true;
     inviteBellsDesk.src = LANDING2A_DESKTOP_VIDEO;
-    // Warm Celebrating Together bells so that overlay doesn’t flash soft/white
-    const bells = document.createElement("video");
-    bells.muted = true;
-    bells.preload = "auto";
-    bells.playsInline = true;
-    bells.src = CELEBRATING_TOGETHER_BELLS;
-    const deskBells = document.createElement("video");
-    deskBells.muted = true;
-    deskBells.preload = "auto";
-    deskBells.playsInline = true;
-    deskBells.src = CELEBRATING_TOGETHER_BELLS_DESKTOP;
+    // Warm Celebrating Together with the same landing2a bells
+    const celebratingBells = document.createElement("video");
+    celebratingBells.muted = true;
+    celebratingBells.preload = "auto";
+    celebratingBells.playsInline = true;
+    celebratingBells.src = LANDING2A_VIDEO;
+    const celebratingBellsDesk = document.createElement("video");
+    celebratingBellsDesk.muted = true;
+    celebratingBellsDesk.preload = "auto";
+    celebratingBellsDesk.playsInline = true;
+    celebratingBellsDesk.src = LANDING2A_DESKTOP_VIDEO;
     // Warm Our Story clip so tap → sound is immediate
     preloadOurStoryAudio();
-    preloadSaveTheDateAudio();
-    // Warm Save the Date so the overlay can play on first tap
-    const saveTheDate = document.createElement("video");
-    saveTheDate.preload = "auto";
-    saveTheDate.playsInline = true;
-    saveTheDate.muted = true;
-    saveTheDate.src = SAVE_THE_DATE_VIDEO;
   }, []);
 
   const scrollToCountdown = useCallback((smooth = true) => {
@@ -185,12 +168,23 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
     window.scrollTo({ top, behavior: smooth ? "smooth" : "auto" });
   }, []);
 
+  const scrollToCelebrating = useCallback((smooth = true) => {
+    const section = document.getElementById("celebrating-together");
+    if (!section) return;
+    const top = section.getBoundingClientRect().top + window.scrollY;
+    window.scrollTo({ top, behavior: smooth ? "smooth" : "auto" });
+  }, []);
+
   const goToCountdown = useCallback(() => {
     pushInviteStep("scroll");
     scrollToCountdown(true);
   }, [scrollToCountdown]);
 
-  // If the guest stays on the invite, ease them to the countdown after a minute
+  const goToCelebrating = useCallback(() => {
+    scrollToCelebrating(true);
+  }, [scrollToCelebrating]);
+
+  // If the guest stays on the invite, ease them to the countdown
   useEffect(() => {
     if (!interactive) return;
 
@@ -208,12 +202,86 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
+
     return () => {
       cancelled = true;
       window.clearTimeout(timer);
       window.removeEventListener("scroll", onScroll);
     };
   }, [interactive, goToCountdown]);
+
+  // Idle on the menu → ease down to Celebrating Together after 30s
+  useEffect(() => {
+    if (!interactive) return;
+
+    const menu = document.getElementById("countdown-nav");
+    const celebrating = document.getElementById("celebrating-together");
+    if (!menu || !celebrating) return;
+
+    let cancelled = false;
+    let armed = false;
+    let timer: number | null = null;
+
+    const clearTimer = () => {
+      if (timer != null) {
+        window.clearTimeout(timer);
+        timer = null;
+      }
+    };
+
+    const celebratingAlreadyNear = () =>
+      celebrating.getBoundingClientRect().top < window.innerHeight * 0.85;
+
+    const arm = () => {
+      if (cancelled || armed) return;
+      if (celebratingAlreadyNear()) {
+        cancelled = true;
+        return;
+      }
+      armed = true;
+      timer = window.setTimeout(() => {
+        if (cancelled || celebratingAlreadyNear()) return;
+        scrollToCelebrating(true);
+      }, MENU_TO_CELEBRATING_DELAY_MS);
+    };
+
+    const onScroll = () => {
+      // Guest scrolled toward Celebrating Together — don't fight them
+      if (celebratingAlreadyNear()) {
+        cancelled = true;
+        clearTimer();
+      }
+    };
+
+    const onPointer = () => {
+      // Any tap/drag on the menu resets the idle window once armed
+      if (!armed || cancelled) return;
+      clearTimer();
+      timer = window.setTimeout(() => {
+        if (cancelled || celebratingAlreadyNear()) return;
+        scrollToCelebrating(true);
+      }, MENU_TO_CELEBRATING_DELAY_MS);
+    };
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) arm();
+      },
+      { threshold: 0.45 }
+    );
+    observer.observe(menu);
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    menu.addEventListener("pointerdown", onPointer, { passive: true });
+
+    return () => {
+      cancelled = true;
+      clearTimer();
+      observer.disconnect();
+      window.removeEventListener("scroll", onScroll);
+      menu.removeEventListener("pointerdown", onPointer);
+    };
+  }, [interactive, scrollToCelebrating]);
 
   // When the guest scrolls the menu into view, keep history in sync for Back
   useEffect(() => {
@@ -241,11 +309,8 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
 
   const closeAllOverlays = useCallback(() => {
     stopOurStoryAudio();
-    stopSaveTheDateAudio();
     setOurStoryOpen(false);
-    setSaveTheDateOpen(false);
     setWeddingEventsOpen(false);
-    setCelebratingTogetherOpen(false);
     setOverlayRevealed(false);
   }, []);
 
@@ -262,48 +327,19 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
     if (id === "our-story") {
       kickOurStoryAudio();
       flushSync(() => {
-        setSaveTheDateOpen(false);
         setWeddingEventsOpen(false);
-        setCelebratingTogetherOpen(false);
         setOverlayRevealed(false);
         setOurStoryOpen(true);
       });
       return;
     }
 
-    if (id === "save-the-date") {
-      flushSync(() => {
-        setOurStoryOpen(false);
-        setWeddingEventsOpen(false);
-        setCelebratingTogetherOpen(false);
-        setOverlayRevealed(false);
-        setSaveTheDateOpen(true);
-      });
-      // Same tap unlocks unmuted autoplay on iPhone
-      kickSaveTheDatePlayback();
-      return;
-    }
-
     if (id === "events") {
       flushSync(() => {
         setOurStoryOpen(false);
-        setSaveTheDateOpen(false);
-        setCelebratingTogetherOpen(false);
         setOverlayRevealed(false);
         setWeddingEventsOpen(true);
       });
-      return;
-    }
-
-    if (id === "celebrating-together") {
-      flushSync(() => {
-        setOurStoryOpen(false);
-        setSaveTheDateOpen(false);
-        setWeddingEventsOpen(false);
-        setOverlayRevealed(false);
-        setCelebratingTogetherOpen(true);
-      });
-      kickCelebratingBellsPlayback();
     }
   }, []);
 
@@ -326,12 +362,7 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
   /** After press hold — fade home out, fade destination in */
   const onNavNavigate = useCallback(async (id: InviteNavDestination) => {
     if (id === "more-of-us") return;
-    if (
-      id !== "our-story" &&
-      id !== "save-the-date" &&
-      id !== "events" &&
-      id !== "celebrating-together"
-    ) {
+    if (id !== "our-story" && id !== "events") {
       return;
     }
     if (navBusy.current) return;
@@ -399,24 +430,14 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
   );
 
   useEffect(() => {
-    if (
-      !ourStoryOpen &&
-      !saveTheDateOpen &&
-      !weddingEventsOpen &&
-      !celebratingTogetherOpen
-    ) {
+    if (!ourStoryOpen && !weddingEventsOpen) {
       return;
     }
     document.documentElement.classList.add("is-scroll-locked");
     return () => {
       document.documentElement.classList.remove("is-scroll-locked");
     };
-  }, [
-    ourStoryOpen,
-    saveTheDateOpen,
-    weddingEventsOpen,
-    celebratingTogetherOpen,
-  ]);
+  }, [ourStoryOpen, weddingEventsOpen]);
 
   return (
     <>
@@ -435,8 +456,7 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
           aria-label="Invitation"
         >
           {/*
-            isolation: bells multiply against the invite PNG only (same as desktop /
-            Celebrating Together).
+            isolation: bells multiply against the invite PNG only.
           */}
           <div
             className="pointer-events-none absolute inset-0 overflow-hidden"
@@ -513,7 +533,10 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
           onPressStart={onNavPressStart}
           onPressCancel={onNavPressCancel}
           onNavigate={onNavNavigate}
+          onContinue={interactive ? goToCelebrating : undefined}
         />
+
+        <CelebratingTogetherSection />
       </div>
 
       <OurStoryScroll
@@ -521,18 +544,8 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
         revealed={overlayRevealed}
         onClose={closeViaBack}
       />
-      <SaveTheDateVideo
-        open={saveTheDateOpen}
-        revealed={overlayRevealed}
-        onClose={closeViaBack}
-      />
       <WeddingEvents
         open={weddingEventsOpen}
-        revealed={overlayRevealed}
-        onClose={closeViaBack}
-      />
-      <CelebratingTogether
-        open={celebratingTogetherOpen}
         revealed={overlayRevealed}
         onClose={closeViaBack}
       />
