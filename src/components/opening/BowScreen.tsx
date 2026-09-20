@@ -130,7 +130,7 @@ export function BowScreen({ isUnwrapping, onUnwrap, onUnwrapped }: BowScreenProp
       )}
 
       <p
-        className="pointer-events-none absolute bottom-10 left-0 right-0 z-[60] text-center font-display text-xs font-light tracking-[0.35em] text-[#5C4A42]/60 sm:text-sm"
+        className="pointer-events-none absolute bottom-10 left-0 right-0 z-[60] text-center font-display text-xs font-light tracking-[0.35em] text-[#5C4A42] sm:text-sm"
         style={{
           textTransform: "uppercase",
           opacity: isUnwrapping ? 0 : 1,
