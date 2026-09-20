@@ -25,6 +25,16 @@ const pinyon = Pinyon_Script({
 export const metadata: Metadata = {
   title: "Wedding Invitation",
   description: "Dharmi & Arpit — wedding celebration",
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+    googleBot: {
+      index: false,
+      follow: false,
+      noimageindex: true,
+    },
+  },
 };
 
 export const viewport: Viewport = {
