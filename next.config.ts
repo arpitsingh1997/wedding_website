@@ -7,6 +7,16 @@ const nextConfig: NextConfig = {
   allowedDevOrigins: ["127.0.0.1", "localhost", "10.0.0.2", "10.0.0.3"],
   async headers() {
     return [
+      // Keep the invite off search engines (link-only sharing)
+      {
+        source: "/:path*",
+        headers: [
+          {
+            key: "X-Robots-Tag",
+            value: "noindex, nofollow, noarchive, nosnippet, noimageindex",
+          },
+        ],
+      },
       // Invite video + art must cache on phone Wi‑Fi (was re-downloading ~13MB every load)
       {
         source: "/images/:path*",
