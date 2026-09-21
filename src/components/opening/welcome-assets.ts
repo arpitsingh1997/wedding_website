@@ -22,10 +22,10 @@ export const LANDING3_SCROLL = `/images/landing3@2x.png?landing3-20260919c`;
 export const LANDING3_DESKTOP = `/images/desklanding3@2x.png?desklanding3-20260919b`;
 
 /** Celebrating Together scroll section — phone (landing4@2x.png) */
-export const CELEBRATING_TOGETHER = `/images/landing4@2x.png?landing4-20260920a`;
+export const CELEBRATING_TOGETHER = `/images/landing4@2x.png?landing4-20260921b`;
 
 /** Celebrating Together scroll section — desktop (desklanding4@2x.png) */
-export const CELEBRATING_TOGETHER_DESKTOP = `/images/desklanding4@2x.png?desklanding4-20260919a`;
+export const CELEBRATING_TOGETHER_DESKTOP = `/images/desklanding4@2x.png?desklanding4-20260921b`;
 
 /** Wedding Events — ordered phone panels from Desktop “Events mobile” (5→9). */
 export const WEDDING_EVENTS_MOBILE_PAGES = [
