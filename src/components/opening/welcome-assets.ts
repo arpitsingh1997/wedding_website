@@ -1,7 +1,7 @@
 export const BUILD = "landing2a-20260722f";
 
 /** Phone invite — base art (Desktop landing2@2x.png) */
-export const LANDING2_PHONE = `/images/landing2@2x.png?landing2-20260809c`;
+export const LANDING2_PHONE = `/images/landing2@2x.png?landing2-20260923a`;
 
 /** Phone invite — bells overlay (Desktop landing2a@2x.mp4), white plate + multiply */
 export const LANDING2A_VIDEO = `/images/landing2a@2x.mp4?landing2a-20260919b`;
@@ -10,7 +10,7 @@ export const LANDING2A_VIDEO = `/images/landing2a@2x.mp4?landing2a-20260919b`;
 export const LANDING2_POSTER = LANDING2_PHONE;
 
 /** Invitation screen — desktop static art (after bow) */
-export const LANDING2_DESKTOP = `/images/desklanding2@2x.png?desklanding2-20260809b`;
+export const LANDING2_DESKTOP = `/images/desklanding2@2x.png?desklanding2-20260923a`;
 
 /** Desktop invite — bells overlay (desklanding2a@2x.mp4), white plate + multiply */
 export const LANDING2A_DESKTOP_VIDEO = `/images/desklanding2a@2x.mp4?desklanding2a-20260919b`;
