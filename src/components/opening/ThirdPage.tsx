@@ -11,6 +11,7 @@ import {
 } from "react";
 import { useIsDesktop } from "@/lib/use-is-desktop";
 import { flushSync } from "react-dom";
+import { kickEventsAudio, preloadEventsAudio, stopEventsAudio } from "./events-audio";
 import { kickOurStoryAudio, preloadOurStoryAudio, stopOurStoryAudio } from "./our-story-audio";
 import {
   PAGE_FADE_IN_MS,
@@ -29,6 +30,7 @@ import { CelebratingTogetherSection } from "./CelebratingTogetherSection";
 import { OurStoryScroll } from "./OurStoryScroll";
 import { PAGE_CREAM } from "./page-cream";
 import { PostRevealNav, type InviteNavDestination } from "./PostRevealNav";
+import { WardrobePlanner } from "./WardrobePlanner";
 import { WeddingEvents } from "./WeddingEvents";
 import {
   CELEBRATING_TOGETHER,
@@ -103,6 +105,7 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
   const [revealed, setRevealed] = useState(false);
   const [ourStoryOpen, setOurStoryOpen] = useState(false);
   const [weddingEventsOpen, setWeddingEventsOpen] = useState(false);
+  const [wardrobePlannerOpen, setWardrobePlannerOpen] = useState(false);
   /** Soft fade-in for overlays (invitation page-turn) */
   const [overlayRevealed, setOverlayRevealed] = useState(false);
   /** Fade the invite/scroll surface out while opening a destination */
@@ -157,8 +160,9 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
     celebratingBellsDesk.preload = "auto";
     celebratingBellsDesk.playsInline = true;
     celebratingBellsDesk.src = LANDING2A_DESKTOP_VIDEO;
-    // Warm Our Story clip so tap → sound is immediate
+    // Warm Our Story + Wedding Events clips so tap → sound is immediate
     preloadOurStoryAudio();
+    preloadEventsAudio();
   }, []);
 
   const scrollToCountdown = useCallback((smooth = true) => {
@@ -309,8 +313,10 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
 
   const closeAllOverlays = useCallback(() => {
     stopOurStoryAudio();
+    stopEventsAudio();
     setOurStoryOpen(false);
     setWeddingEventsOpen(false);
+    setWardrobePlannerOpen(false);
     setOverlayRevealed(false);
   }, []);
 
@@ -324,23 +330,15 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
   }, [closeAllOverlays]);
 
   const openDestination = useCallback((id: InviteNavDestination) => {
-    if (id === "our-story") {
-      kickOurStoryAudio();
-      flushSync(() => {
-        setWeddingEventsOpen(false);
-        setOverlayRevealed(false);
-        setOurStoryOpen(true);
-      });
-      return;
-    }
-
-    if (id === "events") {
-      flushSync(() => {
-        setOurStoryOpen(false);
-        setOverlayRevealed(false);
-        setWeddingEventsOpen(true);
-      });
-    }
+    if (id === "more-of-us") return;
+    if (id === "our-story") kickOurStoryAudio();
+    if (id === "events") kickEventsAudio();
+    flushSync(() => {
+      setOverlayRevealed(false);
+      setOurStoryOpen(id === "our-story");
+      setWeddingEventsOpen(id === "events");
+      setWardrobePlannerOpen(id === "wardrobe-planner");
+    });
   }, []);
 
   /** Gesture-safe: start media / mount overlay invisible on press */
@@ -362,9 +360,6 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
   /** After press hold — fade home out, fade destination in */
   const onNavNavigate = useCallback(async (id: InviteNavDestination) => {
     if (id === "more-of-us") return;
-    if (id !== "our-story" && id !== "events") {
-      return;
-    }
     if (navBusy.current) return;
     navBusy.current = true;
     setNavigationLocked(true);
@@ -430,14 +425,14 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
   );
 
   useEffect(() => {
-    if (!ourStoryOpen && !weddingEventsOpen) {
+    if (!ourStoryOpen && !weddingEventsOpen && !wardrobePlannerOpen) {
       return;
     }
     document.documentElement.classList.add("is-scroll-locked");
     return () => {
       document.documentElement.classList.remove("is-scroll-locked");
     };
-  }, [ourStoryOpen, weddingEventsOpen]);
+  }, [ourStoryOpen, weddingEventsOpen, wardrobePlannerOpen]);
 
   return (
     <>
@@ -546,6 +541,11 @@ export const ThirdPage = forwardRef<ThirdPageHandle, ThirdPageProps>(
       />
       <WeddingEvents
         open={weddingEventsOpen}
+        revealed={overlayRevealed}
+        onClose={closeViaBack}
+      />
+      <WardrobePlanner
+        open={wardrobePlannerOpen}
         revealed={overlayRevealed}
         onClose={closeViaBack}
       />

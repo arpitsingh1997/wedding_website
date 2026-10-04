@@ -24,7 +24,8 @@ import {
 const INSTAGRAM_URL = "https://www.instagram.com/dharmiandarpit";
 
 /**
- * Phone hit boxes — landing3@2x.png (1080×1920): Our Story, Wedding Events, More of Us.
+ * Phone hit boxes — landing3a@2x.png (1080×1920):
+ * Our Story, Wedding Events, Wardrobe Planner, More of Us.
  */
 const MOBILE_BTN = {
   left: "10.3%",
@@ -32,69 +33,86 @@ const MOBILE_BTN = {
   height: "5.16%",
 } as const;
 
-const MOBILE_NAV_ITEMS = [
+const MOBILE_NAV_ITEMS: readonly NavItem[] = [
   {
     label: "Our Story",
     href: "#our-story",
-    id: "our-story" as const,
+    id: "our-story",
     top: "49.01%",
     ...MOBILE_BTN,
   },
   {
     label: "Wedding Events",
     href: "#events",
-    id: "events" as const,
-    top: "56.88%",
+    id: "events",
+    top: "56.56%",
+    ...MOBILE_BTN,
+  },
+  {
+    label: "Wardrobe Planner",
+    href: "#wardrobe-planner",
+    id: "wardrobe-planner",
+    top: "64.06%",
     ...MOBILE_BTN,
   },
   {
     label: "More of Us",
     href: INSTAGRAM_URL,
-    id: "more-of-us" as const,
-    top: "64.74%",
+    id: "more-of-us",
+    top: "71.61%",
     ...MOBILE_BTN,
   },
-] as const;
+];
 
 /**
- * Desktop hit boxes — desklanding3@2x.png:
+ * Desktop hit boxes — desklanding3a@2x.png (2732×1536):
  * Row1: Our Story | Wedding Events
- * Row2: More of Us (centered)
+ * Row2: More of Us | Wardrobe Planner
  */
-const DESKTOP_NAV_ITEMS = [
+const DESKTOP_LEFT_COLUMN = { left: "29.61%", width: "16.47%" } as const;
+const DESKTOP_RIGHT_COLUMN = { left: "49.23%", width: "21.16%" } as const;
+const DESKTOP_BTN_HEIGHT = "6.71%";
+
+const DESKTOP_NAV_ITEMS: readonly NavItem[] = [
   {
     label: "Our Story",
     href: "#our-story",
-    id: "our-story" as const,
-    top: "42.77%",
-    left: "31.4%",
-    width: "16.4%",
-    height: "6.71%",
+    id: "our-story",
+    top: "42.71%",
+    height: DESKTOP_BTN_HEIGHT,
+    ...DESKTOP_LEFT_COLUMN,
   },
   {
     label: "Wedding Events",
     href: "#events",
-    id: "events" as const,
-    top: "42.77%",
-    left: "51.0%",
-    width: "17.7%",
-    height: "6.71%",
+    id: "events",
+    top: "42.71%",
+    height: DESKTOP_BTN_HEIGHT,
+    ...DESKTOP_RIGHT_COLUMN,
   },
   {
     label: "More of Us",
     href: INSTAGRAM_URL,
-    id: "more-of-us" as const,
-    top: "52.60%",
-    left: "41.2%",
-    width: "17.6%",
-    height: "6.71%",
+    id: "more-of-us",
+    top: "52.54%",
+    height: DESKTOP_BTN_HEIGHT,
+    ...DESKTOP_LEFT_COLUMN,
   },
-] as const;
+  // No desktop art yet: no id keeps it inert (tap does nothing, no continue).
+  {
+    label: "Wardrobe Planner",
+    href: "#wardrobe-planner",
+    top: "52.54%",
+    height: DESKTOP_BTN_HEIGHT,
+    ...DESKTOP_RIGHT_COLUMN,
+  },
+];
 
 export type InviteNavDestination =
   | "our-story"
   | "more-of-us"
-  | "events";
+  | "events"
+  | "wardrobe-planner";
 
 type NavItemId = InviteNavDestination;
 
