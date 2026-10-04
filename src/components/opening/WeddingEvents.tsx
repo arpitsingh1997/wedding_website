@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { kickEventsAudio, stopEventsAudio } from "./events-audio";
 import { PAGE_CREAM } from "./page-cream";
 import { useInviteOverlayFade } from "./use-invite-overlay-fade";
 import {
@@ -55,9 +56,15 @@ export function WeddingEvents({
   }, []);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      stopEventsAudio();
+      return;
+    }
     document.documentElement.classList.add("is-scroll-locked");
     document.getElementById("wedding-events")?.scrollTo(0, 0);
+    kickEventsAudio();
+    // Do NOT stop audio in cleanup — React Strict Mode remount would kill it
+    // right after the tap gesture, leaving silence on iPhone.
     return () => {
       document.documentElement.classList.remove("is-scroll-locked");
     };

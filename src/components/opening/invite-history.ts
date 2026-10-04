@@ -5,7 +5,8 @@ export type InviteHistoryStep =
   | "invite"
   | "scroll"
   | "our-story"
-  | "events";
+  | "events"
+  | "wardrobe-planner";
 
 const MARKER = "wedding-invite-v1";
 
@@ -42,12 +43,12 @@ export function pushInviteStep(step: InviteHistoryStep) {
   history.pushState({ m: MARKER, step } satisfies InviteHistoryState, "", cleanPath());
 }
 
-export type InviteDestinationStep = "our-story" | "events";
+export type InviteDestinationStep = "our-story" | "events" | "wardrobe-planner";
 
 export function isDestinationStep(
   step: InviteHistoryStep
 ): step is InviteDestinationStep {
-  return step === "our-story" || step === "events";
+  return step === "our-story" || step === "events" || step === "wardrobe-planner";
 }
 
 /** Ensure scroll is under the destination so Back lands on the menu page. */
