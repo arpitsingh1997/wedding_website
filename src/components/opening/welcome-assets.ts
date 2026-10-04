@@ -36,14 +36,10 @@ export const WEDDING_EVENTS_MOBILE_PAGES = [
   `/images/events/mobile/page-5.png?events-20261003a`,
 ] as const;
 
-/** Wardrobe Planner — ordered phone panels from Desktop “Wardrobe Planner” (1→6). */
+/** Wardrobe Planner — phone panels from Desktop “Wardrobe Planner/Wardrobe Planner” (1→2). */
 export const WARDROBE_PLANNER_MOBILE_PAGES = [
-  `/images/wardrobe/mobile/page-1.png?wardrobe-20261004a`,
-  `/images/wardrobe/mobile/page-2.png?wardrobe-20261004a`,
-  `/images/wardrobe/mobile/page-3.png?wardrobe-20261004a`,
-  `/images/wardrobe/mobile/page-4.png?wardrobe-20261004a`,
-  `/images/wardrobe/mobile/page-5.png?wardrobe-20261004a`,
-  `/images/wardrobe/mobile/page-6.png?wardrobe-20261004b`,
+  `/images/wardrobe/mobile/page-1.png?wardrobe-20261005b`,
+  `/images/wardrobe/mobile/page-2.png?wardrobe-20261005b`,
 ] as const;
 
 /** Wedding Events — ordered desktop panels from Desktop “Events desktop” (8→12). */
