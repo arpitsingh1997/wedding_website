@@ -4,7 +4,10 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { PAGE_CREAM } from "./page-cream";
 import { useInviteOverlayFade } from "./use-invite-overlay-fade";
-import { WARDROBE_PLANNER_MOBILE_PAGES } from "./welcome-assets";
+import {
+  WARDROBE_PLANNER_DESKTOP_PAGES,
+  WARDROBE_PLANNER_MOBILE_PAGES,
+} from "./welcome-assets";
 
 type WardrobePlannerProps = {
   open: boolean;
@@ -12,7 +15,29 @@ type WardrobePlannerProps = {
   onClose: () => void;
 };
 
-/** Full-page Wardrobe Planner sequence (phone only for now). */
+/** `art-phone` / `art-desktop` switch at the same width as the menu art. */
+function PlannerPages({
+  pages,
+  artClass,
+}: {
+  pages: readonly string[];
+  artClass: "art-phone" | "art-desktop";
+}) {
+  return pages.map((src, index) => (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      key={src}
+      src={src}
+      alt={`Wardrobe planner, page ${index + 1} of ${pages.length}`}
+      className={`${artClass} block h-auto w-full max-w-none`}
+      decoding={index === 0 ? "sync" : "async"}
+      fetchPriority={index === 0 ? "high" : "auto"}
+      draggable={false}
+    />
+  ));
+}
+
+/** Full-page Wardrobe Planner sequence: phone and desktop panels. */
 export function WardrobePlanner({
   open,
   revealed = true,
@@ -53,7 +78,7 @@ export function WardrobePlanner({
       <button
         type="button"
         onClick={onClose}
-        className="fixed right-3 z-[100030] flex h-11 w-11 items-center justify-center rounded-full font-display text-2xl leading-none shadow-md"
+        className="fixed right-3 z-[100030] flex h-11 w-11 items-center justify-center rounded-full font-display text-2xl leading-none shadow-md lg:right-5"
         style={{
           top: "max(0.75rem, env(safe-area-inset-top))",
           color: "#5C1A1A",
@@ -66,18 +91,8 @@ export function WardrobePlanner({
       </button>
 
       <main className="w-full leading-[0]">
-        {WARDROBE_PLANNER_MOBILE_PAGES.map((src, index) => (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            key={src}
-            src={src}
-            alt={`Wardrobe planner, page ${index + 1} of ${WARDROBE_PLANNER_MOBILE_PAGES.length}`}
-            className="block h-auto w-full max-w-none"
-            decoding={index === 0 ? "sync" : "async"}
-            fetchPriority={index === 0 ? "high" : "auto"}
-            draggable={false}
-          />
-        ))}
+        <PlannerPages pages={WARDROBE_PLANNER_MOBILE_PAGES} artClass="art-phone" />
+        <PlannerPages pages={WARDROBE_PLANNER_DESKTOP_PAGES} artClass="art-desktop" />
       </main>
     </div>,
     document.body
