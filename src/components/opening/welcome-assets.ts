@@ -42,13 +42,19 @@ export const WARDROBE_PLANNER_MOBILE_PAGES = [
   `/images/wardrobe/mobile/page-2.png?wardrobe-20261005b`,
 ] as const;
 
+/** Wardrobe Planner — desktop panels from Desktop “Wardrobe Planner (1366 x 768 px)” (1→2). */
+export const WARDROBE_PLANNER_DESKTOP_PAGES = [
+  `/images/wardrobe/desktop/page-1.png?wardrobe-desk-20261005a`,
+  `/images/wardrobe/desktop/page-2.png?wardrobe-desk-20261005a`,
+] as const;
+
 /** Wedding Events — ordered desktop panels from Desktop “Events desktop” (8→12). */
 export const WEDDING_EVENTS_DESKTOP_PAGES = [
   `/images/events/desktop/page-1.png?events-20261003a`,
   `/images/events/desktop/page-2.png?events-20261003a`,
   `/images/events/desktop/page-3.png?events-20261003a`,
   `/images/events/desktop/page-4.png?events-20261003a`,
-  `/images/events/desktop/page-5.png?events-20261003a`,
+  `/images/events/desktop/page-5.png?events-20261005a`,
 ] as const;
 
 /** Our Story — Mac: single seamless scroll (Desktop “our story/Desktop (Website).png”) */

@@ -98,10 +98,10 @@ const DESKTOP_NAV_ITEMS: readonly NavItem[] = [
     height: DESKTOP_BTN_HEIGHT,
     ...DESKTOP_LEFT_COLUMN,
   },
-  // No desktop art yet: no id keeps it inert (tap does nothing, no continue).
   {
     label: "Wardrobe Planner",
     href: "#wardrobe-planner",
+    id: "wardrobe-planner",
     top: "52.54%",
     height: DESKTOP_BTN_HEIGHT,
     ...DESKTOP_RIGHT_COLUMN,
