@@ -12,7 +12,7 @@ type WardrobePlannerProps = {
   onClose: () => void;
 };
 
-/** Full-page Wardrobe Planner sequence (phone only for now: 1→6). */
+/** Full-page Wardrobe Planner sequence (phone only for now). */
 export function WardrobePlanner({
   open,
   revealed = true,
