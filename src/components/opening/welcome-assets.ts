@@ -38,8 +38,8 @@ export const WEDDING_EVENTS_MOBILE_PAGES = [
 
 /** Wardrobe Planner — phone panels from Desktop “Wardrobe Planner/Wardrobe Planner” (1→2). */
 export const WARDROBE_PLANNER_MOBILE_PAGES = [
-  `/images/wardrobe/mobile/page-1.png?wardrobe-20261005c`,
-  `/images/wardrobe/mobile/page-2.png?wardrobe-20261005b`,
+  `/images/wardrobe/mobile/page-1.png?wardrobe-20261008b`,
+  `/images/wardrobe/mobile/page-2.png?wardrobe-20261008b`,
 ] as const;
 
 /** Wardrobe Planner — desktop panels from Desktop “Wardrobe Planner (1366 x 768 px)” (1→2). */
