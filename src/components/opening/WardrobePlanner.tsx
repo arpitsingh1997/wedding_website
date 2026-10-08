@@ -9,6 +9,9 @@ import {
   WARDROBE_PLANNER_MOBILE_PAGES,
 } from "./welcome-assets";
 
+/** Matches the planner art's own background so there's no seam while pages load. */
+const PLANNER_BACKGROUND = "#FDF6EC";
+
 type WardrobePlannerProps = {
   open: boolean;
   revealed?: boolean;
@@ -37,7 +40,7 @@ function PlannerPages({
   ));
 }
 
-/** Full-page Wardrobe Planner sequence: phone and desktop panels. */
+/** Full-page Wardrobe Planner: panels fill the screen width and scroll vertically. */
 export function WardrobePlanner({
   open,
   revealed = true,
@@ -66,7 +69,7 @@ export function WardrobePlanner({
       id="wardrobe-planner"
       className="full-viewport z-[100020] select-none overflow-y-auto overflow-x-hidden overscroll-y-contain"
       style={{
-        backgroundColor: PAGE_CREAM,
+        backgroundColor: PLANNER_BACKGROUND,
         WebkitOverflowScrolling: "touch",
         userSelect: "none",
         ...fadeStyle,

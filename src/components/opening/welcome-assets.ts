@@ -42,10 +42,9 @@ export const WARDROBE_PLANNER_MOBILE_PAGES = [
   `/images/wardrobe/mobile/page-2.png?wardrobe-20261008b`,
 ] as const;
 
-/** Wardrobe Planner — desktop panels from Desktop “Wardrobe Planner (1366 x 768 px)” (1→2). */
+/** Wardrobe Planner — single tall desktop panel from Desktop “Wardrobe Planner desk.png”. */
 export const WARDROBE_PLANNER_DESKTOP_PAGES = [
-  `/images/wardrobe/desktop/page-1.png?wardrobe-desk-20261005a`,
-  `/images/wardrobe/desktop/page-2.png?wardrobe-desk-20261005a`,
+  `/images/wardrobe/desktop/page-1.png?wardrobe-desk-20261008a`,
 ] as const;
 
 /** Wedding Events — ordered desktop panels from Desktop “Events desktop” (7→11). */
